@@ -1,10 +1,3 @@
-//
-//  PAMSApp.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/23/25.
-//
-
 import SwiftUI
 import SwiftData
 

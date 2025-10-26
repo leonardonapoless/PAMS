@@ -1,0 +1,16 @@
+{
+  "images" : [
+    {
+      "filename" : "plini_salt_charcoal.jpeg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "compression-type" : "lossless",
+    "template-rendering-intent" : "original"
+  }
+}
