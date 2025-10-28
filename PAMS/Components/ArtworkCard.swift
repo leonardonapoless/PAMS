@@ -107,7 +107,7 @@ private struct AnimatedBorder: View {
                 .trim(from: rotation, to: rotation + strokeLength)
                 .stroke(strokeColor.opacity(0.9), style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round))
                 .onAppear {
-                    withAnimation(.linear(duration: speed).repeatForever()) {
+                    withAnimation(.easeIn(duration: speed).repeatForever()) {
                         rotation = clockwise ? 1.0 : -1.0
                     }
                 }

@@ -1,0 +1,16 @@
+Secret Keys
+
+PAMS/Keys.plist
+
+Xcode Build Products
+
+DerivedData/
+
+Xcode User Settings
+
+*.xcuserdatad
+.xcodeproj/.xcworkspace/xcuserdata/
+
+macOS System Files
+
+.DS_Store

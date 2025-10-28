@@ -2,25 +2,29 @@ import SwiftUI
 
 public struct ContentView: View {
     @StateObject private var viewModel = SongViewModel()
-    @Debounced(wrappedValue: "", delay: 0.5) private var searchTerm: String
+    @State private var searchTerm: String = ""
 
     public var body: some View {
         VStack {
             HeaderView()
             NavigationView {
-                resultsListView
-                    .searchable(text: $searchTerm, prompt: "Search Song or Album")
-                    .onChange(of: searchTerm) {
-                        Task {
-                            await viewModel.search(term: searchTerm)
-                        }
+                ZStack {
+                    resultsListView
+                    if viewModel.isLoading {
+                        AnimatedPatternView(strokeWidth: 4)
+                            .frame(width: 100, height: 100)
                     }
+                }
+                .searchable(text: $searchTerm, prompt: "Search Song or Album")
+                .onChange(of: searchTerm) {
+                    viewModel.search(term: searchTerm)
+                }
             }
         }
     }
 
     private var resultsListView: some View {
-        ResultsListView(results: viewModel.results)
+        ResultsListView(results: viewModel.results, isLoading: viewModel.isLoading)
     }
 }
 
