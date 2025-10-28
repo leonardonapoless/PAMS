@@ -3,10 +3,16 @@ import SwiftUI
 struct AnimatedPatternView: View {
     @State private var progress: CGFloat = 0
     @Environment(\.colorScheme) var colorScheme
+    let strokeWidth: CGFloat
+
+    init(strokeWidth: CGFloat = 1) {
+        self.strokeWidth = strokeWidth
+    }
+
     var body: some View {
         GreekKeyShape()
             .trim(from: 0, to: progress)
-            .stroke(colorScheme == .dark ? Color.white : Color.black, style: StrokeStyle(lineWidth: 1, lineCap: .round, lineJoin: .round))
+            .stroke(colorScheme == .dark ? Color.white : Color.black, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
             .onAppear {
                 startAnimation()
             }

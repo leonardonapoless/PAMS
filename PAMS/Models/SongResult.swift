@@ -7,20 +7,6 @@
 
 import Foundation
 
-public struct PlatformLinks: Codable, Sendable, Equatable, Hashable {
-    public var apple: String?
-    public var spotify: String?
-    public var tidal: String?
-    public var youtube: String?
-
-    public init(apple: String? = nil, spotify: String? = nil, tidal: String? = nil, youtube: String? = nil) {
-        self.apple = apple
-        self.spotify = spotify
-        self.tidal = tidal
-        self.youtube = youtube
-    }
-}
-
 public struct SearchResult: Identifiable, Hashable, Sendable {
     public let id: String
     public let title: String

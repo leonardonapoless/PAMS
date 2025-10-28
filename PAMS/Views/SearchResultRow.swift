@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct SearchResultRow: View {
     @Environment(\.openURL) private var openURL
@@ -12,9 +13,14 @@ struct SearchResultRow: View {
     let iconYTWhite: String
     let iconYTBlack: String
 
-    private func openURLString(_ string: String?) {
-        guard let string, let url = URL(string: string), !string.isEmpty else { return }
-        openURL(url)
+    private func open(link: PlatformLink?) {
+        guard let link else { return }
+
+        if let nativeUrlString = link.nativeUrl, let nativeUrl = URL(string: nativeUrlString), UIApplication.shared.canOpenURL(nativeUrl) {
+            openURL(nativeUrl)
+        } else if let webUrlString = link.webUrl, let webUrl = URL(string: webUrlString) {
+            openURL(webUrl)
+        }
     }
 
     var body: some View {
@@ -74,19 +80,21 @@ struct SearchResultRow: View {
                     .font(.headline)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(result.artist)
                     .font(.subheadline)
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
-                
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .padding(.horizontal, 32)
 
             HStack(spacing: 18) {
                 PlatformButton(icon: .system("applelogo"), size: 44) {
-                    openURLString(result.links.apple) }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconSpotifyWhite : iconSpotifyBlack), size: 44) { openURLString(result.links.spotify) }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconTidalWhite : iconTidalBlack), size: 44) { openURLString(result.links.tidal) }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconYTWhite : iconYTBlack ), size: 44) { openURLString(result.links.youtube) }
+                    open(link: result.links.apple) }
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconSpotifyWhite : iconSpotifyBlack), size: 44) { open(link: result.links.spotify) }
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconTidalWhite : iconTidalBlack), size: 44) { open(link: result.links.tidal) }
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconYTWhite : iconYTBlack ), size: 44) { open(link: result.links.youtube) }
             }
             .font(.title3)
         }
