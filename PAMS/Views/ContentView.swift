@@ -2,8 +2,10 @@ import SwiftUI
 
 public struct ContentView: View {
     @StateObject private var viewModel = SongViewModel()
-    @State private var searchTerm: String = ""
-
+    @State private var liveSearchTerm: String = ""
+    @Debounced(wrappedValue: "", delay: 0.5) private var debouncedSearchTerm: String
+    @State private var isTyping: Bool = false
+    
     public var body: some View {
         VStack {
             HeaderView()
@@ -11,14 +13,19 @@ public struct ContentView: View {
                 ZStack {
                     resultsListView
                     if viewModel.isLoading {
-                        AnimatedPatternView(strokeWidth: 4)
+                        AnimatedPatternView(strokeWidth: 4, enableHaptics: !isTyping)
                             .frame(width: 100, height: 100)
                     }
                 }
-                .searchable(text: $searchTerm, prompt: "Search Song or Album")
-                .onChange(of: searchTerm) {
-                    viewModel.search(term: searchTerm)
+                .searchable(text: $liveSearchTerm, prompt: "Search Song or Album")
+                .onChange(of: liveSearchTerm) { _, newValue in
+                    isTyping = true
+                    debouncedSearchTerm = newValue
                 }
+                .onChange(of: debouncedSearchTerm) { _, newValue in
+                                    isTyping = false // User has stopped typing
+                                    viewModel.search(term: newValue)
+                                }
             }
         }
     }

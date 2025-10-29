@@ -51,6 +51,7 @@ struct ArtworkCard<Front: View, Back: View>: View {
                 rotation += 180
             }
         }
+        .sensoryFeedback(.impact(weight: .light), trigger: rotation)
     }
 
     // front
