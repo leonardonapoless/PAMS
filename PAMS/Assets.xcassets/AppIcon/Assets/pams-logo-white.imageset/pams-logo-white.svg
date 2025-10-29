@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1600">
+    <path 
+        d="
+            M 400 400 L 400 600 L 600 600 L 600 400 L 700 400 L 700 700 L 400 700
+            M 1200 400 L 1000 400 L 1000 600 L 1200 600 L 1200 700 L 900 700 L 900 400
+            M 1200 1200 L 1200 1000 L 1000 1000 L 1000 1200 L 900 1200 L 900 900 L 1200 900
+            M 400 1200 L 600 1200 L 600 1000 L 400 1000 L 400 900 L 700 900 L 700 1200
+        " 
+        fill="none" 
+        stroke="white" 
+        stroke-width="80" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+    />
+</svg>
