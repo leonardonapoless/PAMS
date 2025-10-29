@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ADC3B5772EB2D0990030386E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = ADC3B5762EB2D0990030386E /* AppIcon.icon */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		AD78AA8C2EAA345500DE7FC6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -28,6 +32,7 @@
 		AD78AA7C2EAA345400DE7FC6 /* PAMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PAMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78AA8B2EAA345500DE7FC6 /* PAMSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PAMSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD78AA952EAA345500DE7FC6 /* PAMSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PAMSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ADC3B5762EB2D0990030386E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -94,6 +99,7 @@
 				AD78AA8E2EAA345500DE7FC6 /* PAMSTests */,
 				AD78AA982EAA345500DE7FC6 /* PAMSUITests */,
 				AD78AA7D2EAA345400DE7FC6 /* Products */,
+				ADC3B5762EB2D0990030386E /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -227,6 +233,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADC3B5772EB2D0990030386E /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -414,6 +421,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58FL69225C;
@@ -453,6 +461,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 58FL69225C;
