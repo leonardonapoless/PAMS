@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HeaderView: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("PAMS")
                     .fontWeight(.black)
