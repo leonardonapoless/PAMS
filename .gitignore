@@ -1,16 +1,113 @@
-Secret Keys
-
+# Secret Keys
 PAMS/Keys.plist
 
-Xcode Build Products
-
+# ============================================
+# Xcode Build Products
+# ============================================
 DerivedData/
+build/
+*.ipa
+*.xcarchive
+*.dSYM
+*.dSYM.zip
+*.xcuserstate
 
-Xcode User Settings
-
+# ============================================
+# Xcode User Settings
+# ============================================
 *.xcuserdatad
-.xcodeproj/.xcworkspace/xcuserdata/
+.xcodeproj/xcuserdata/
+.xcworkspace/xcuserdata/
+*.xcscmblueprint
+*.xccheckout
 
-macOS System Files
+# ============================================
+# Swift Package Manager
+# ============================================
+.swiftpm/
+.build/
+Package.resolved
+Packages/
+workspace-state.json
 
+# ============================================
+# CocoaPods
+# ============================================
+Pods/
+Podfile.lock
+
+# ============================================
+# Carthage
+# ============================================
+Carthage/Build/
+Carthage/Checkouts/
+
+# ============================================
+# Swift Playgrounds
+# ============================================
+timeline.xctimeline
+playground.xcworkspace/
+
+# ============================================
+# Fastlane
+# ============================================
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+fastlane/readme.md
+
+# ============================================
+# Xcode Automatically Generated Files
+# ============================================
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# ============================================
+# macOS System Files
+# ============================================
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+__MACOSX/
+
+# ============================================
+# Temporary / Cache Files
+# ============================================
+*.swp
+*.lock
+*.tmp
+*.bak
+*.orig
+*.so
+*.log
+*.xcactivitylog
+*.xcresult
+
+# ============================================
+# Firebase / GoogleService
+# ============================================
+GoogleService-Info.plist
+
+# ============================================
+# SwiftData / CoreData Generated
+# ============================================
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# ============================================
+# Environment & Config Files
+# ============================================
+.env
+*.xcconfig
+
+# ============================================
+# Other Editor Files
+# ============================================
+*.zed/
+*.idea/
+*.vscode/
+
