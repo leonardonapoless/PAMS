@@ -85,7 +85,7 @@ public final class SongViewModel: ObservableObject {
                     }
                 }
 
-                // check again if user typed while it were fetching details
+                // check again if user typed while it was fetching details
                 guard !Task.isCancelled else {
                     isLoading = false
                     return
