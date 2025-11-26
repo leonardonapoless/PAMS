@@ -53,7 +53,6 @@ public final class SongViewModel: ObservableObject {
 
                 // check if user typed again
                 guard !Task.isCancelled else {
-                    isLoading = false
                     return
                 }
 
@@ -87,7 +86,6 @@ public final class SongViewModel: ObservableObject {
 
                 // check again if user typed while it was fetching details
                 guard !Task.isCancelled else {
-                    isLoading = false
                     return
                 }
 
