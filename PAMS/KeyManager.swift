@@ -1,15 +1,15 @@
-//
-//  KeyManager.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/27/25.
-//
+
+
+
+
+
+
 
 import Foundation
 
 enum KeyManager {
 
-    // immutable snapshot loaded on the main actor during bootstrap.
+    
     private struct LoadedKeys {
         let spotifyClientID: String
         let spotifyClientSecret: String
@@ -21,7 +21,7 @@ enum KeyManager {
         let configVersion: String?
     }
 
-    // stored snapshot accessible from any actor after bootstrap
+    
     private static var loaded: LoadedKeys?
 
     // MARK: - Bootstrap
@@ -67,7 +67,7 @@ enum KeyManager {
 
     // MARK: - Internal loading (MainActor)
 
-    // cache to avoid re-reading from disk repeatedly
+    
     private static var cachedKeys: [String: Any]?
 
     @MainActor
@@ -84,7 +84,7 @@ enum KeyManager {
                 return plist
             }
         }
-        // if reached here, couldn't load any plist
+        
         fatalError("CRITICAL: Configuration plist not found.")
     }
 
@@ -116,8 +116,8 @@ enum KeyManager {
         loaded?.spotifyTokenRefreshURL
     }
 
-    // musicbrainz user agent (required by musicbrainz default provided if not set)
-    // Inside MusicAPIService.swift
+    
+    
     static let musicBrainzUserAgent = "PAMS/1.0 (https://github.com/leonardonapoless)"
 
 }

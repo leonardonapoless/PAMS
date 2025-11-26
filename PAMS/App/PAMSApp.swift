@@ -18,7 +18,7 @@ struct PAMSApp: App {
     }()
 
     init() {
-        KeyManager.bootstrap() // loads Keys.plist on the main actor
+        KeyManager.bootstrap() 
     }
 
     var body: some Scene {

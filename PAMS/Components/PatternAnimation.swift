@@ -37,7 +37,7 @@ struct AnimatedPatternView: View {
                     stopHapticLoop()
                 }
             }
-//            .frame(width: 100, height: 100, alignment: .center)
+
             .sensoryFeedback(.impact(weight: .heavy, intensity: 0.7), trigger: hapticTrigger)
     }
 
@@ -58,35 +58,35 @@ struct AnimatedPatternView: View {
     }
     
         private func startHapticLoop() {
-            guard !isHapticLoopActive else { return } // don't start a new loop
+            guard !isHapticLoopActive else { return } 
             isHapticLoopActive = true
-            hapticPhase = 0.0 // reset the wave
-            scheduleNextHapticTick() // start the loop
+            hapticPhase = 0.0 
+            scheduleNextHapticTick() 
         }
 
-        // this function recursively calls itself with a changing delay
+        
         private func scheduleNextHapticTick() {
-            guard isHapticLoopActive else { return } // the loop stops when this is false
+            guard isHapticLoopActive else { return } 
 
-            // fire the haptic
+            
             hapticTrigger += 1
             
-            // calculate the next delay using a sine wave
-            // this creates a "wave" that oscillates the delay time
-            let baseDelay = 0.15  // the average time between vibrations (in seconds)
-            let modulation = 0.07 // how much the time will speed up or slow down
-            let speed = 0.05      // how fast the wave oscillates
             
-            // this calculation will result in a delay between
-            // 0.08s (0.15 - 0.07) and 0.22s (0.15 + 0.07)
+            
+            let baseDelay = 0.15  
+            let modulation = 0.07 
+            let speed = 0.05      
+            
+            
+            
             let delayModulation = sin(hapticPhase * .pi * 2) * modulation
             let nextDelay = baseDelay + delayModulation
             
-            // advance the phase of the wave
-            // .truncatingRemainder ensures it loops between 0.0 and 1.0
+            
+            
             hapticPhase = (hapticPhase + speed).truncatingRemainder(dividingBy: 1.0)
             
-            // schedule the next tick
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + nextDelay) {
                 scheduleNextHapticTick()
             }

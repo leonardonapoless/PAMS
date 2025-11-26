@@ -26,7 +26,7 @@ struct SearchResultRow: View {
     var body: some View {
         VStack(spacing: 12) {
             ArtworkCard {
-                // front
+                
                 if let url = result.artworkURL {
                     AsyncImage(url: url) { phase in
                         switch phase {
@@ -44,7 +44,7 @@ struct SearchResultRow: View {
                     Color.secondary.opacity(0.1)
                 }
             } back: {
-                // back
+                
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Release Date: \(result.releaseDate)")
                     Divider()

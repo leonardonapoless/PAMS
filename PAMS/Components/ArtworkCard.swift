@@ -32,11 +32,11 @@ struct ArtworkCard<Front: View, Back: View>: View {
         self.back = back()
     }
 
-    // determines if the card's front face should be visible
+    
     private var isFaceUp: Bool {
         let degrees = rotation.truncatingRemainder(dividingBy: 360)
-        // the front is visible when the rotation is between 0 and 90 degrees,
-        // or between 270 and 360 degrees.
+        
+        
         return (degrees >= 0 && degrees < 90) || (degrees >= 270 && degrees < 360)
     }
 
@@ -54,21 +54,21 @@ struct ArtworkCard<Front: View, Back: View>: View {
         .sensoryFeedback(.impact(weight: .light), trigger: rotation)
     }
 
-    // front
+    
     private var cardFront: some View {
         cardBody(front)
             .opacity(isFaceUp ? 1 : 0)
     }
 
-    // back
+    
     private var cardBack: some View {
         cardBody(back)
             .opacity(isFaceUp ? 0 : 1)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-            // the drawingGroup is used to improve animation performance of the
-            // material background on the back of the card. it composites the
-            // view into a bitmap before the rotation, preventing rendering
-            // issues during the flip animation
+            
+            
+            
+            
             .drawingGroup()
     }
 
@@ -120,7 +120,7 @@ private struct AnimatedBorder: View {
 struct FlippableArtworkCard_Previews: PreviewProvider {
     static var previews: some View {
         ArtworkCard {
-            // front
+            
             Image(systemName: "music.note")
                 .resizable()
                 .scaledToFit()
@@ -128,7 +128,7 @@ struct FlippableArtworkCard_Previews: PreviewProvider {
                 .foregroundColor(.purple)
                 .background(Color(.systemGray6))
         } back: {
-            // back
+            
             VStack(spacing: 6) {
                 Text("Song Name")
                     .font(.headline)

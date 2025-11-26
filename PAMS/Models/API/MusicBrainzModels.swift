@@ -1,16 +1,6 @@
-//
-//  MusicBrainzModels.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/27/25.
-//
-
 import Foundation
 
 // MARK: - MusicBrainz Credits Struct (Our Tidy Model)
-
-/// a simple, clean struct to hold the credits fetched from MusicBrainz
-/// this is much tidier than using a complex tuple
 public struct MusicBrainzCredits: Sendable {
     public let songwriter: String?
     public let producer: String?
@@ -20,16 +10,12 @@ public struct MusicBrainzCredits: Sendable {
     public let duration: String?
     public let recordLabel: String?
     public let copyright: String?
-
-    // an empty state for when a search fails
     public static var empty: MusicBrainzCredits {
         MusicBrainzCredits(songwriter: nil, producer: nil, album: nil, releaseDate: nil, genre: nil, duration: nil, recordLabel: nil, copyright: nil)
     }
 }
 
-
 // MARK: - MusicBrainz API Decoding Models (The "Blueprints")
-
 public struct MusicBrainzISRCResponse: Sendable, Codable {
     public let recordings: [MusicBrainzRecording]
 }
@@ -53,8 +39,8 @@ public struct MusicBrainzReleaseList: Sendable, Codable {
 }
 
 public struct MusicBrainzRelease: Sendable, Codable {
-    public let title: String? // album title
-    public let date: String?  // release date
+    public let title: String? 
+    public let date: String?  
     public let labelInfo: [MusicBrainzLabelInfo]?
     public let artistCredits: [MusicBrainzArtistCredit]?
 
@@ -67,7 +53,7 @@ public struct MusicBrainzRelease: Sendable, Codable {
 }
 
 public struct MusicBrainzRelation: Sendable, Codable {
-    public let type: String // e.g. "producer", "songwriter"
+    public let type: String 
     public let artist: MusicBrainzArtistCredit
 }
 

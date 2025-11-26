@@ -1,28 +1,16 @@
-//
-//  Debounced.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/25/25.
-//
-
 import SwiftUI
 import Combine
 
-// a property wrapper that debounces a value
-// this is useful for delaying a search query until the user has stopped typing
 @propertyWrapper
 public struct Debounced<Value>: DynamicProperty {
     @StateObject private var debouncer: Debouncer<Value>
-
     public init(wrappedValue: Value, delay: TimeInterval) {
         _debouncer = StateObject(wrappedValue: Debouncer(initialValue: wrappedValue, delay: delay))
     }
-
     public var wrappedValue: Value {
         get { debouncer.currentValue }
         nonmutating set { debouncer.update(newValue) }
     }
-
     public var projectedValue: Binding<Value> {
         Binding(
             get: { wrappedValue },

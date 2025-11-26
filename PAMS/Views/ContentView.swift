@@ -24,7 +24,7 @@ public struct ContentView: View {
                     debouncedSearchTerm = newValue
                 }
                 .onChange(of: debouncedSearchTerm) { _, newValue in
-                                    isTyping = false // User has stopped typing
+                                    isTyping = false 
                                     viewModel.search(term: newValue)
                                 }
             }

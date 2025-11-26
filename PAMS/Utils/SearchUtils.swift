@@ -4,7 +4,6 @@ import Foundation
 public class MusicSearchRanker {
 
     // MARK: - Config
-
     // words to ignore
     private let stopWords: Set<String> = ["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with"]
 
@@ -26,7 +25,6 @@ public class MusicSearchRanker {
     ]
 
     // MARK: - Weights
-
     // how important is title vs artist
     private let titleWeight: Double = 0.6
     private let artistWeight: Double = 0.3
@@ -47,7 +45,6 @@ public class MusicSearchRanker {
     private let popularArtistThreshold: Int = 80
 
     // MARK: - Caching
-
     // cache for tokens
     private var tokenCache = [String: [String]]()
 
@@ -66,7 +63,6 @@ public class MusicSearchRanker {
     }
 
     // MARK: - Public API
-
     // main search function
     public func sortAndFilterTracks(tracks: [SpotifyTrack], term: String) -> [SpotifyTrack] {
         // process query
@@ -86,7 +82,6 @@ public class MusicSearchRanker {
     }
 
     // MARK: - Scoring
-
     // process the search text
     private func processQuery(term: String) -> ProcessedQuery {
         let tokens = tokenize(term)
@@ -215,7 +210,6 @@ public class MusicSearchRanker {
     }
 
     // MARK: - Text Processing
-
     // get tokens from cache
     private func getCachedTokens(for string: String) -> [String] {
         if let cached = tokenCache[string] {
@@ -269,7 +263,6 @@ public class MusicSearchRanker {
     }
 
     // MARK: - Algorithms
-
     // for typo check
     // (faster with char arrays)
     private func levenshteinDistance(a: String, b: String) -> Int {

@@ -1,14 +1,6 @@
-//
-//  SpotifyAPI.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/27/25.
-//
-
 import Foundation
 
 // MARK: - Spotify API Models
-
 public struct SpotifyTokenResponse: Sendable, Codable {
     public let accessToken: String
     public let expiresIn: Int
@@ -29,7 +21,7 @@ public struct SpotifyTrackList: Sendable, Codable {
 
 public struct SpotifyTrack: Sendable, Codable, Identifiable {
     public let id: String
-    public let name: String // song title
+    public let name: String 
     public let artists: [SpotifyArtist]
     public let album: SpotifyAlbum
     public let externalIds: SpotifyExternalIDs?
@@ -77,7 +69,7 @@ public struct SpotifyExternalIDs: Sendable, Codable {
 }
 
 public struct SpotifyExternalURLs: Sendable, Codable {
-    public let spotify: String // the URL for this track
+    public let spotify: String 
 }
 
 public struct SpotifyCopyright: Sendable, Codable {

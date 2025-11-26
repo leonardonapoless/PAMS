@@ -1,10 +1,3 @@
-//
-//  SongResult.swift
-//  PAMS
-//
-//  Created by Leonardo Nápoles on 10/24/25.
-//
-
 import Foundation
 
 public struct SearchResult: Identifiable, Hashable, Sendable {

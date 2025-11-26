@@ -2,31 +2,20 @@ import Foundation
 
 @MainActor
 class MusicAPIService {
-
-    // create a shared instance of the service
     static let shared = MusicAPIService()
-
-    // a single, reusable session for all network requests
     private let httpClient = URLSession.shared
-
-    // spotify token caching
-    // these are now properties of the @mainactor-isolated class
     private var spotifyToken: SpotifyTokenResponse?
     private var tokenExpiryTime = Date.distantPast
-
-    // musicbrainz requires a user-agent
     private let musicBrainzUserAgent = "PAMS/1.0 ( https://github.com/leonardonapoless )"
 
     // MARK: - public api functions
-
-    // the main spotify search (the "scout")
     func searchSpotify(term: String) async throws -> [SpotifyTrack] {
-        // first, get a valid token (either cached or new)
+        
         guard let token = try await getSpotifyToken() else {
             throw URLError(.userAuthenticationRequired)
         }
 
-        // build the url
+        
         var urlComponents = URLComponents(string: "https://api.spotify.com/v1/search")!
         urlComponents.queryItems = [
             URLQueryItem(name: "q", value: term),
@@ -36,18 +25,18 @@ class MusicAPIService {
 
         guard let url = urlComponents.url else { throw URLError(.badURL) }
 
-        // build the request, adding the token
+        
         var request = URLRequest(url: url)
         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 
-        // make the call
+        
         let (data, response) = try await httpClient.data(for: request)
 
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
 
-        // decode the json "blueprint"
+        
         let decoder = JSONDecoder()
         let responseModel = try decoder.decode(SpotifySearchResponse.self, from: data)
 
@@ -78,7 +67,7 @@ class MusicAPIService {
         return track
     }
 
-    // get universal links from songlink
+    
     func getSonglink(for spotifyURL: String) async -> PlatformLinks? {
         guard let encodedURL = spotifyURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://api.song.link/v1-alpha.1/links?url=\(encodedURL)") else {
@@ -93,12 +82,10 @@ class MusicAPIService {
             return PlatformLinks(from: responseModel)
         } catch {
             print("Songlink failed for URL \(spotifyURL): \(error.localizedDescription)")
-            return nil // fail gracefully, don't crash
+            return nil 
         }
     }
 
-    // get credits from musicbrainz
-    // this now returns the clean musicbrainzcredits struct
     func getMusicBrainzCredits(isrc: String?) async -> MusicBrainzCredits {
         guard let isrc, !isrc.isEmpty else {
             return .empty
@@ -154,34 +141,26 @@ class MusicAPIService {
     }
 
     // MARK: - private: spotify token logic
-
-    // this function safely gets and caches the spotify access token
     private func getSpotifyToken() async throws -> SpotifyTokenResponse? {
 
-        // if we have a token and it's still valid, return it instantly
         if let token = spotifyToken, tokenExpiryTime > Date() {
             return token
         }
 
-        // get keys safely from keymanager
         let clientID = KeyManager.spotifyClientID
         let clientSecret = KeyManager.spotifyClientSecret
 
-        // prepare the request (base64 encoding)
         guard let authString = "\(clientID):\(clientSecret)".data(using: .utf8) else {
             throw URLError(.badURL)
         }
         let base64AuthString = authString.base64EncodedString()
-
-        // configure the url and request
         let url = URL(string: "https://accounts.spotify.com/api/token")!
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Basic \(base64AuthString)", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = "grant_type=client_credentials".data(using: .utf8)
-
-        // make the call
+        
         let (data, response) = try await httpClient.data(for: request)
 
         guard (response as? HTTPURLResponse)?.statusCode == 200 else {
@@ -190,8 +169,7 @@ class MusicAPIService {
 
         let decoder = JSONDecoder()
         let tokenResponse = try decoder.decode(SpotifyTokenResponse.self, from: data)
-
-        // cache the new token and set its expiry time
+        
         self.spotifyToken = tokenResponse
         self.tokenExpiryTime = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 300))
 
