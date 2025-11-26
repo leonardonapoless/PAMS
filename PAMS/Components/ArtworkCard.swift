@@ -36,7 +36,6 @@ struct ArtworkCard<Front: View, Back: View>: View {
     private var isFaceUp: Bool {
         let degrees = rotation.truncatingRemainder(dividingBy: 360)
         
-        
         return (degrees >= 0 && degrees < 90) || (degrees >= 270 && degrees < 360)
     }
 
@@ -53,22 +52,16 @@ struct ArtworkCard<Front: View, Back: View>: View {
         }
         .sensoryFeedback(.impact(weight: .light), trigger: rotation)
     }
-
     
     private var cardFront: some View {
         cardBody(front)
             .opacity(isFaceUp ? 1 : 0)
     }
-
     
     private var cardBack: some View {
         cardBody(back)
             .opacity(isFaceUp ? 0 : 1)
             .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
-            
-            
-            
-            
             .drawingGroup()
     }
 
