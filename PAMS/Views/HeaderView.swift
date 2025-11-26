@@ -9,9 +9,10 @@ struct HeaderView: View {
                     .monospaced()
                     .font(.largeTitle)
 
-                AnimatedPatternView()
-                    .frame(width: 32, height: 32)
-                    .padding(.leading, -10)
+                AnimatedPatternView(strokeWidth: 2)
+                    .frame(width: 30, height: 30)
+                    .padding(.leading, -4)
+                    .padding(.top, 8)
             }
             Text("Platform Agnostic Music Search")
                 .fontWeight(.bold)
@@ -20,4 +21,8 @@ struct HeaderView: View {
         }
         .padding(.horizontal)
     }
+}
+
+#Preview {
+    HeaderView()
 }
