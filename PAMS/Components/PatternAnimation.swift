@@ -11,7 +11,7 @@ struct AnimatedPatternView: View {
     @State private var isHapticLoopActive: Bool = false
     @State private var hapticPhase: Double = 0.0
     
-    init(strokeWidth: CGFloat = 1, enableHaptics: Bool = false) {
+    init(strokeWidth: CGFloat = 2, enableHaptics: Bool = false) {
         self.strokeWidth = strokeWidth
         self.enableHaptics = enableHaptics
     }
@@ -37,6 +37,7 @@ struct AnimatedPatternView: View {
                     stopHapticLoop()
                 }
             }
+//            .frame(width: 100, height: 100, alignment: .center)
             .sensoryFeedback(.impact(weight: .heavy, intensity: 0.7), trigger: hapticTrigger)
     }
 
@@ -100,42 +101,42 @@ struct AnimatedPatternView: View {
 
 struct GreekKeyShape: Shape {
     func path(in rect: CGRect) -> Path {
+        let width = rect.width
+        let height = rect.height
+        
+        let points: [CGPoint] = [
+            
+            CGPoint(x: 0.00, y: 0.75),
+            CGPoint(x: 0.00, y: 0.00),
+            CGPoint(x: 1.00, y: 0.00),
+            CGPoint(x: 1.00, y: 1.00),
+            
+            CGPoint(x: 0.170, y: 1.00),
+            CGPoint(x: 0.170, y: 0.25),
+            CGPoint(x: 0.790, y: 0.25),
+            CGPoint(x: 0.790, y: 0.80),
+            CGPoint(x: 0.330, y: 0.80),
+            CGPoint(x: 0.330, y: 0.44),
+            CGPoint(x: 0.625, y: 0.44),
+            CGPoint(x: 0.625, y: 0.650),
+            CGPoint(x: 0.48, y: 0.650),
+            CGPoint(x: 0.48, y: 0.56),
+        ]
+        
         var path = Path()
-        let w = rect.width
-        let unit = w / 12
-
-        path.move(to: CGPoint(x: unit * 2, y: unit * 2))
-        path.addLine(to: CGPoint(x: unit * 2, y: unit * 4))
-        path.addLine(to: CGPoint(x: unit * 4, y: unit * 4))
-        path.addLine(to: CGPoint(x: unit * 4, y: unit * 2))
-        path.addLine(to: CGPoint(x: unit * 5, y: unit * 2))
-        path.addLine(to: CGPoint(x: unit * 5, y: unit * 5))
-        path.addLine(to: CGPoint(x: unit * 2, y: unit * 5))
-
-        path.move(to: CGPoint(x: unit * 10, y: unit * 2))
-        path.addLine(to: CGPoint(x: unit * 8, y: unit * 2))
-        path.addLine(to: CGPoint(x: unit * 8, y: unit * 4))
-        path.addLine(to: CGPoint(x: unit * 10, y: unit * 4))
-        path.addLine(to: CGPoint(x: unit * 10, y: unit * 5))
-        path.addLine(to: CGPoint(x: unit * 7, y: unit * 5))
-        path.addLine(to: CGPoint(x: unit * 7, y: unit * 2))
-
-        path.move(to: CGPoint(x: unit * 10, y: unit * 10))
-        path.addLine(to: CGPoint(x: unit * 10, y: unit * 8))
-        path.addLine(to: CGPoint(x: unit * 8, y: unit * 8))
-        path.addLine(to: CGPoint(x: unit * 8, y: unit * 10))
-        path.addLine(to: CGPoint(x: unit * 7, y: unit * 10))
-        path.addLine(to: CGPoint(x: unit * 7, y: unit * 7))
-        path.addLine(to: CGPoint(x: unit * 10, y: unit * 7))
-
-        path.move(to: CGPoint(x: unit * 2, y: unit * 10))
-        path.addLine(to: CGPoint(x: unit * 4, y: unit * 10))
-        path.addLine(to: CGPoint(x: unit * 4, y: unit * 8))
-        path.addLine(to: CGPoint(x: unit * 2, y: unit * 8))
-        path.addLine(to: CGPoint(x: unit * 2, y: unit * 7))
-        path.addLine(to: CGPoint(x: unit * 5, y: unit * 7))
-        path.addLine(to: CGPoint(x: unit * 5, y: unit * 10))
-
+        
+        guard let first = points.first else { return path }
+        
+        path.move(to: CGPoint(x: first.x * width, y: first.y * height))
+        
+        for point in points.dropFirst() {
+            path.addLine(to: CGPoint(x: point.x * width, y: point.y * height))
+        }
+        
         return path
     }
+}
+
+#Preview {
+    AnimatedPatternView()
 }

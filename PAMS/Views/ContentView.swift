@@ -14,7 +14,7 @@ public struct ContentView: View {
                     resultsListView
                     if viewModel.isLoading {
                         AnimatedPatternView(strokeWidth: 4, enableHaptics: !isTyping)
-                            .frame(width: 100, height: 100)
+                            .frame(width: 80, height: 80)
                             .zIndex(1)
                     }
                 }
