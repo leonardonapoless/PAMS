@@ -57,47 +57,36 @@ struct AnimatedPatternView: View {
         }
     }
     
-        private func startHapticLoop() {
-            guard !isHapticLoopActive else { return } 
-            isHapticLoopActive = true
-            hapticPhase = 0.0 
-            scheduleNextHapticTick() 
-        }
+    private func startHapticLoop() {
+        guard !isHapticLoopActive else { return }
+        isHapticLoopActive = true
+        hapticPhase = 0.0
+        scheduleNextHapticTick()
+    }
 
-        
-        private func scheduleNextHapticTick() {
-            guard isHapticLoopActive else { return } 
+    private func scheduleNextHapticTick() {
+        guard isHapticLoopActive else { return }
 
-            
-            hapticTrigger += 1
-            
-            
-            
-            let baseDelay = 0.15  
-            let modulation = 0.07 
-            let speed = 0.05      
-            
-            
-            
-            let delayModulation = sin(hapticPhase * .pi * 2) * modulation
-            let nextDelay = baseDelay + delayModulation
-            
-            
-            
-            hapticPhase = (hapticPhase + speed).truncatingRemainder(dividingBy: 1.0)
-            
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + nextDelay) {
-                scheduleNextHapticTick()
-            }
-        }
+        hapticTrigger += 1
 
-        private func stopHapticLoop() {
-            isHapticLoopActive = false
+        let baseDelay = 0.15
+        let modulation = 0.07
+        let speed = 0.05
+
+        let delayModulation = sin(hapticPhase * .pi * 2) * modulation
+        let nextDelay = baseDelay + delayModulation
+
+        hapticPhase = (hapticPhase + speed).truncatingRemainder(dividingBy: 1.0)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + nextDelay) {
+            scheduleNextHapticTick()
         }
     }
 
-
+    private func stopHapticLoop() {
+        isHapticLoopActive = false
+    }
+}
 
 struct GreekKeyShape: Shape {
     func path(in rect: CGRect) -> Path {
@@ -105,22 +94,20 @@ struct GreekKeyShape: Shape {
         let height = rect.height
         
         let points: [CGPoint] = [
-            
             CGPoint(x: 0.00, y: 0.75),
             CGPoint(x: 0.00, y: 0.00),
             CGPoint(x: 1.00, y: 0.00),
             CGPoint(x: 1.00, y: 1.00),
-            
-            CGPoint(x: 0.170, y: 1.00),
-            CGPoint(x: 0.170, y: 0.25),
-            CGPoint(x: 0.790, y: 0.25),
-            CGPoint(x: 0.790, y: 0.80),
-            CGPoint(x: 0.330, y: 0.80),
-            CGPoint(x: 0.330, y: 0.44),
+            CGPoint(x: 0.17, y: 1.00),
+            CGPoint(x: 0.17, y: 0.25),
+            CGPoint(x: 0.79, y: 0.25),
+            CGPoint(x: 0.79, y: 0.80),
+            CGPoint(x: 0.33, y: 0.80),
+            CGPoint(x: 0.33, y: 0.44),
             CGPoint(x: 0.625, y: 0.44),
-            CGPoint(x: 0.625, y: 0.650),
-            CGPoint(x: 0.48, y: 0.650),
-            CGPoint(x: 0.48, y: 0.56),
+            CGPoint(x: 0.625, y: 0.65),
+            CGPoint(x: 0.48, y: 0.65),
+            CGPoint(x: 0.48, y: 0.56)
         ]
         
         var path = Path()

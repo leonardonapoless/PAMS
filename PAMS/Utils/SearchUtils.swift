@@ -1,10 +1,7 @@
 import Foundation
 
-// ranks search results
 public class MusicSearchRanker {
 
-    // MARK: - Config
-    // words to ignore
     private let stopWords: Set<String> = ["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with"]
 
     private let synonyms: [String: String] = [
@@ -13,170 +10,105 @@ public class MusicSearchRanker {
         "feat": "featuring"
     ]
 
-    // lower scores
-    private let negativeKeywords: [String: Double] = [
-        "remix": 0.5,
-        "cover": 0.2,
-        "take": 0.6,
-        "version": 0.4,
-        "tribute": 0.3,
-        "live": 0.1,
-        "ao vivo": 0.0
-    ]
+    private let ignoredWords: Set<String> = ["remastered", "remaster", "stereo", "mono", "deluxe", "edition", "expanded", "anniversary"]
 
-    // MARK: - Weights
-    // how important is title vs artist
-    private let titleWeight: Double = 0.6
-    private let artistWeight: Double = 0.3
-    private let albumWeight: Double = 0.1
+    private let titleWeight: Double = 0.5
+    private let artistWeight: Double = 0.5
+    private let albumWeight: Double = 0.2
 
-    // score for 1, 2, or 3 word matches
-    private let unigramWeight: Double = 1.0       // 1 word
-    private let bigramWeight: Double = 2.0        // 2 words
-    private let trigramWeight: Double = 3.0       // 3 words
-    private let fuzzyMatchWeight: Double = 0.5    // typos
+    private let unigramWeight: Double = 1.0
+    private let fuzzyMatchWeight: Double = 0.5
     private let fuzzySimilarityThreshold: Double = 0.8
 
-    // popularity weights
-    // track streams matter more
-    private let trackPopularityWeight: Double = 0.6  // dominant factor (streams)
-    private let artistPopularityWeight: Double = 0.2  // secondary factor (fame)
-    private let popularArtistBonus: Double = 0.1      // small extra nudge
-    private let popularArtistThreshold: Int = 80
+    private let trackPopularityWeight: Double = 0.5
+    private let artistPopularityWeight: Double = 3.0
+    private let originalRankWeight: Double = 5.0
+    private let popularArtistBonus: Double = 1.0
+    private let popularArtistThreshold: Int = 50
 
-    // MARK: - Caching
-    // cache for tokens
-    private var tokenCache = [String: [String]]()
-
-    // process query once
     private struct ProcessedQuery {
         let tokens: [String]
         let tokenSet: Set<String>
-        let bigrams: Set<String>
-        let trigrams: Set<String>
     }
     
     public init() {}
     
-    public func clearCache() {
-        tokenCache = [:]
-    }
-
-    // MARK: - Public API
-    // main search function
     public func sortAndFilterTracks(tracks: [SpotifyTrack], term: String) -> [SpotifyTrack] {
-        // process query
         let query = processQuery(term: term)
 
-        // score tracks
-        let scoredTracks = tracks.map { track in
-            let score = calculateRelevanceScore(for: track, query: query)
+        let scoredTracks = tracks.enumerated().map { index, track in
+            let score = calculateRelevanceScore(for: track, query: query, originalIndex: index, totalTracks: tracks.count)
             return (track: track, score: score)
         }
 
-        // sort
         let sortedScoredTracks = scoredTracks.sorted { $0.score > $1.score }
 
-        // return tracks
         return sortedScoredTracks.map { $0.track }
     }
 
-    // MARK: - Scoring
-    // process the search text
     private func processQuery(term: String) -> ProcessedQuery {
         let tokens = tokenize(term)
         let tokenSet = Set(tokens)
-        let bigrams = ngrams(tokens: tokens, size: 2)
-        let trigrams = ngrams(tokens: tokens, size: 3)
         
         return ProcessedQuery(
             tokens: tokens,
-            tokenSet: tokenSet,
-            bigrams: bigrams,
-            trigrams: trigrams
+            tokenSet: tokenSet
         )
     }
 
-    // score for one track
-    private func calculateRelevanceScore(for track: SpotifyTrack, query: ProcessedQuery) -> Double {
-        
-        // CALCULATE TEXT SCORE
-        
-        // get tokens
-        let trackNameTokens = getCachedTokens(for: track.name)
-        let artistNameTokens = getCachedTokens(for: track.artistName)
-        let albumNameTokens = getCachedTokens(for: track.album.name)
+    private func calculateRelevanceScore(for track: SpotifyTrack, query: ProcessedQuery, originalIndex: Int, totalTracks: Int) -> Double {
+        let trackNameTokens = tokenize(track.name)
+        let artistNameTokens = tokenize(track.artistName)
+        let albumNameTokens = tokenize(track.album.name)
 
-        // score fields
         let titleScore = calculateFieldScore(query: query, fieldTokens: trackNameTokens)
         let artistScore = calculateFieldScore(query: query, fieldTokens: artistNameTokens)
         let albumScore = calculateFieldScore(query: query, fieldTokens: albumNameTokens)
 
-        // add scores
         var textScore = (titleScore * titleWeight) +
                          (artistScore * artistWeight) +
                          (albumScore * albumWeight)
         
-        // if text score is 0, just stop
+        if titleScore > 0 && artistScore > 0 {
+            textScore += 1.0
+        }
+        
         if textScore == 0 {
             return 0
         }
 
-        // apply penalties to the text score
-        
-        // length penalty
         let titleWordCount = Double(trackNameTokens.count)
         let queryWordCount = Double(query.tokens.count)
         
         if titleWordCount > queryWordCount {
-            let diff = titleWordCount - queryWordCount // simple count of extra words
-            let penalty = pow(0.9, diff) // 10% penalty per extra word
+            let diff = titleWordCount - queryWordCount
+            let penalty = pow(0.9, diff)
             textScore *= penalty
         }
         
-        // negative keyword penalties
-        let trackTokenSet = Set(trackNameTokens)
-        for (keyword, penalty) in negativeKeywords {
-            // if track has "remix"
-            if trackTokenSet.contains(keyword) {
-                // and user didn't search for "remix"
-                if !query.tokenSet.contains(keyword) {
-                    // apply penalty
-                    textScore *= penalty
-                }
-            }
-        }
-
-        // CALCULATE POPULARITY SCORE
-        
         var popScore = 0.0
-        // (using new track-dominant weights)
         if let trackPopularity = track.popularity {
             popScore += (Double(trackPopularity) / 100.0) * trackPopularityWeight
         }
         if let artistPopularity = track.artists.first?.popularity {
             popScore += (Double(artistPopularity) / 100.0) * artistPopularityWeight
             if artistPopularity > popularArtistThreshold {
-                popScore += popularArtistBonus // bonus for stars
+                popScore += popularArtistBonus
             }
         }
+        
+        let rankScore = (1.0 - (Double(originalIndex) / Double(totalTracks))) * originalRankWeight
 
-        // combine scores
-        let totalScore = textScore * (1.0 + popScore)
-
-        return totalScore
+        return textScore * (1.0 + popScore + rankScore)
     }
 
-    // score one field (title, artist, etc)
     private func calculateFieldScore(query: ProcessedQuery, fieldTokens: [String]) -> Double {
         var score = 0.0
         let fieldTokenSet = Set(fieldTokens)
 
-        // exact matches
         let exactUnigramMatches = query.tokenSet.intersection(fieldTokenSet)
         score += Double(exactUnigramMatches.count) * unigramWeight
 
-        // typo matches
         let fuzzyQueryTokens = query.tokenSet.subtracting(exactUnigramMatches)
         let fuzzyFieldTokens = fieldTokenSet.subtracting(exactUnigramMatches)
 
@@ -199,50 +131,32 @@ public class MusicSearchRanker {
             }
         }
 
-        // 3. phrase matches
-        let fieldBigrams = ngrams(tokens: fieldTokens, size: 2)
-        score += Double(query.bigrams.intersection(fieldBigrams).count) * bigramWeight
-        
-        let fieldTrigrams = ngrams(tokens: fieldTokens, size: 3)
-        score += Double(query.trigrams.intersection(fieldTrigrams).count) * trigramWeight
-
         return score
     }
 
-    // MARK: - Text Processing
-    // get tokens from cache
-    private func getCachedTokens(for string: String) -> [String] {
-        if let cached = tokenCache[string] {
-            return cached
-        }
-        let tokens = tokenize(string)
-        tokenCache[string] = tokens
-        return tokens
-    }
-
-    // clean up text
     private func tokenize(_ string: String) -> [String] {
         var result = string.lowercased()
 
-        // synonyms
         for (key, value) in synonyms {
             let pattern = "\\b\(NSRegularExpression.escapedPattern(for: key))\\b"
             result = result.replacingOccurrences(of: pattern, with: value, options: [.regularExpression, .caseInsensitive])
         }
 
-        // café -> cafe
         result = result.folding(options: .diacriticInsensitive, locale:.current)
         
-        // remove punctuation
         let allowedChars = CharacterSet.alphanumerics.union(.whitespaces)
         result = result.components(separatedBy: allowedChars.inverted).joined()
 
-        // split words, remove stop words
         let tokens = result.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
-        let filteredTokens = tokens.filter { !stopWords.contains($0) }
+        
+        // Filter stop words, ignored words, and 4-digit years
+        let filteredTokens = tokens.filter { token in
+            if stopWords.contains(token) { return false }
+            if ignoredWords.contains(token) { return false }
+            if token.range(of: #"^\d{4}$"#, options: .regularExpression) != nil { return false }
+            return true
+        }
 
-        // if filtered everything out (e.g., "The The"),
-        // just use the original tokens
         if filteredTokens.isEmpty && !tokens.isEmpty {
             return tokens
         }
@@ -250,7 +164,6 @@ public class MusicSearchRanker {
         return filteredTokens
     }
 
-    // makes 2-word or 3-word phrases
     private func ngrams(tokens: [String], size: Int) -> Set<String> {
         var ngrams = Set<String>()
         guard tokens.count >= size else { return ngrams }
@@ -262,9 +175,6 @@ public class MusicSearchRanker {
         return ngrams
     }
 
-    // MARK: - Algorithms
-    // for typo check
-    // (faster with char arrays)
     private func levenshteinDistance(a: String, b: String) -> Int {
         let aChars = Array(a)
         let bChars = Array(b)
@@ -283,9 +193,9 @@ public class MusicSearchRanker {
                 let cost = aChars[i - 1] == bChars[j - 1] ? 0 : 1
                 
                 currentRow[j] = min(
-                    currentRow[j - 1] + 1, // insertion
-                    previousRow[j] + 1,   // deletion
-                    previousRow[j - 1] + cost // substitution
+                    currentRow[j - 1] + 1,
+                    previousRow[j] + 1,
+                    previousRow[j - 1] + cost
                 )
             }
             previousRow = currentRow

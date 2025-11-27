@@ -40,12 +40,22 @@ public struct SpotifyTrack: Sendable, Codable, Identifiable {
 }
 
 public struct SpotifyArtist: Sendable, Codable {
+    public let id: String
     public let name: String
     public let genres: [String]?
     public let popularity: Int?
 }
 
+public struct SpotifyArtistsResponse: Codable {
+    public let artists: [SpotifyArtist]
+}
+
+public struct SpotifyAlbumsResponse: Codable {
+    public let albums: [SpotifyAlbum]
+}
+
 public struct SpotifyAlbum: Sendable, Codable {
+    public let id: String
     public let name: String
     public let images: [SpotifyImage]
     public let releaseDate: String
@@ -55,7 +65,7 @@ public struct SpotifyAlbum: Sendable, Codable {
     public var artworkURL: URL? { URL(string: images.first?.url ?? "") }
 
     public enum CodingKeys: String, CodingKey {
-        case name, images, copyrights, label
+        case id, name, images, copyrights, label
         case releaseDate = "release_date"
     }
 }
