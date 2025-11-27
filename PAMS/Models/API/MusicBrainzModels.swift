@@ -2,8 +2,6 @@ import Foundation
 
 // MARK: - MusicBrainz Credits Struct (Our Tidy Model)
 public struct MusicBrainzCredits: Sendable {
-    public let songwriter: String?
-    public let producer: String?
     public let album: String?
     public let releaseDate: String?
     public let genre: String?
@@ -11,7 +9,7 @@ public struct MusicBrainzCredits: Sendable {
     public let recordLabel: String?
     public let copyright: String?
     public static var empty: MusicBrainzCredits {
-        MusicBrainzCredits(songwriter: nil, producer: nil, album: nil, releaseDate: nil, genre: nil, duration: nil, recordLabel: nil, copyright: nil)
+        MusicBrainzCredits(album: nil, releaseDate: nil, genre: nil, duration: nil, recordLabel: nil, copyright: nil)
     }
 }
 

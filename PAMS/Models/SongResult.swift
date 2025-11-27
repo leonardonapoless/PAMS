@@ -5,8 +5,6 @@ public struct SearchResult: Identifiable, Hashable, Sendable {
     public let title: String
     public let artist: String
     public let releaseDate: String
-    public let songwriter: String
-    public let producer: String
     public let album: String
     public let genre: String
     public let duration: String
@@ -21,8 +19,6 @@ public struct SearchResult: Identifiable, Hashable, Sendable {
         title: String,
         artist: String,
         releaseDate: String,
-        songwriter: String,
-        producer: String,
         album: String,
         genre: String,
         duration: String,
@@ -36,8 +32,6 @@ public struct SearchResult: Identifiable, Hashable, Sendable {
         self.title = title
         self.artist = artist
         self.releaseDate = releaseDate
-        self.songwriter = songwriter
-        self.producer = producer
         self.album = album
         self.genre = genre
         self.duration = duration
