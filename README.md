@@ -1,5 +1,5 @@
 # PAMS - Platform Agnostic Music Search
-- Demo: <iframe width="560" height="315" src="https://www.youtube.com/embed/d1w29lK44IM?si=JRmHdqPVbaA-q-i_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+- Demo: https://youtu.be/d1w29lK44IM
 
 ## Status: WIP
 - Search via API (Spotify API, Odesli/Songlink, MusicBrainz). results with artwork, title, and artist. ✅
