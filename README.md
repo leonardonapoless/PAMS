@@ -6,16 +6,16 @@
 ![pamsdemovideotrimmed](https://github.com/user-attachments/assets/583a84ff-cf6c-4e8a-9b9f-cd6d5a33801b)
 
 ## Status: WIP
-- Search via API (Spotify API, Odesli/Songlink, MusicBrainz). results with artwork, title, and artist. ✅
-- Flippable artwork card with quick credits (release date, album, etc.). ✅
-- One‑tap deep links to Apple Music, Spotify, TIDAL, and YouTube. ✅
-- Light/Dark Mode‑aware icons and a clean SwiftUI layout. ✅
+- [x] Search via API (Spotify API, Odesli/Songlink, MusicBrainz). results with artwork, title, and artist. 
+- [x] Flippable artwork card with quick credits (release date, album, etc.). 
+- [x] One‑tap deep links to Apple Music, Spotify, TIDAL, and YouTube. 
+- [x] Light/Dark Mode‑aware icons and a clean SwiftUI layout.
 
 ## Roadmap
-- Replace hardcoded data with a proper search/fetch API ✅
-- Add ShazamKit‑powered audio search. ⎯
-- Accessibility polish and localization. ⎯
-- Add more features. (e.g., Favorites tab, user account, customizable platform buttons). ⎯
+- [x] Replace hardcoded data with a proper search/fetch API
+- [] Add ShazamKit‑powered audio search.
+- [] Accessibility polish and localization.
+- [] Add more features. (e.g., Favorites tab, user account, customizable platform buttons).
 
 ## Notes
 - Work in progress: rough edges and frequent changes.
