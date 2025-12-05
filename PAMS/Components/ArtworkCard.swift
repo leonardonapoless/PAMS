@@ -122,7 +122,7 @@ struct AnimatedBorder: View {
                     if isFocused {
                         startAnimation(perimeter: perimeter)
                     } else {
-                        try? await Task.sleep(nanoseconds: 800_000_000)
+                        try? await Task.sleep(for: .milliseconds(800))
                         if !Task.isCancelled {
                             stopAnimation()
                         }
