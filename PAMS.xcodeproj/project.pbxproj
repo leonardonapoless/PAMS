@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ADC3B5772EB2D0990030386E /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = ADC3B5762EB2D0990030386E /* AppIcon.icon */; };
+		AD95E0912ED8E9DA003207BE /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = AD95E0902ED8E9DA003207BE /* AppIcon.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		AD17D35C2EADD35300140B3F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		AD78AA7C2EAA345400DE7FC6 /* PAMS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PAMS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		ADC3B5762EB2D0990030386E /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		AD95E0902ED8E9DA003207BE /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -54,7 +54,7 @@
 				AD17D35C2EADD35300140B3F /* README.md */,
 				AD78AA7E2EAA345400DE7FC6 /* PAMS */,
 				AD78AA7D2EAA345400DE7FC6 /* Products */,
-				ADC3B5762EB2D0990030386E /* AppIcon.icon */,
+				AD95E0902ED8E9DA003207BE /* AppIcon.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -130,7 +130,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ADC3B5772EB2D0990030386E /* AppIcon.icon in Resources */,
+				AD95E0912ED8E9DA003207BE /* AppIcon.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
