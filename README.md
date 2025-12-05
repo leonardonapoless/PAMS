@@ -13,9 +13,9 @@
 
 ## Roadmap
 - [x] Replace hardcoded data with a proper search/fetch API
-- [] Add ShazamKit‑powered audio search.
-- [] Accessibility polish and localization.
-- [] Add more features. (e.g., Favorites tab, user account, customizable platform buttons).
+- [ ] Add ShazamKit‑powered audio search.
+- [ ] Accessibility polish and localization.
+- [ ] Add more features. (e.g., Favorites tab, user account, customizable platform buttons).
 
 ## Notes
 - Work in progress: rough edges and frequent changes.
