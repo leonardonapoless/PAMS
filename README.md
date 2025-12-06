@@ -1,9 +1,10 @@
 # PAMS - Platform Agnostic Music Search
+| Video Demo | GIF |
+| --- | --- |
+| [![Watch the video](https://img.youtube.com/vi/d1w29lK44IM/maxresdefault.jpg)](https://youtu.be/d1w29lK44IM) | ![pamsdemovideotrimmed](https://github.com/user-attachments/assets/583a84ff-cf6c-4e8a-9b9f-cd6d5a33801b) |
 
-[![Watch the video](https://img.youtube.com/vi/d1w29lK44IM/maxresdefault.jpg)](https://youtu.be/d1w29lK44IM)
+### [Watch the demo video on YouTube](https://youtu.be/d1w29lK44IM) 
 
-### [Watch the demo video on YouTube](https://youtu.be/d1w29lK44IM)
-![pamsdemovideotrimmed](https://github.com/user-attachments/assets/583a84ff-cf6c-4e8a-9b9f-cd6d5a33801b)
 
 ## Status: WIP
 - [x] Search via API (Spotify API, Odesli/Songlink, MusicBrainz). results with artwork, title, and artist. 
