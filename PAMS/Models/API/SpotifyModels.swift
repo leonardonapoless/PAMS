@@ -1,37 +1,37 @@
 import Foundation
 
 // MARK: - Spotify API Models
-public struct SpotifyTokenResponse: Sendable, Codable {
-    public let accessToken: String
-    public let expiresIn: Int
+struct SpotifyTokenResponse: Sendable, Codable {
+    let accessToken: String
+    let expiresIn: Int
 
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"
         case expiresIn = "expires_in"
     }
 }
 
-public struct SpotifySearchResponse: Sendable, Codable {
-    public let tracks: SpotifyTrackList?
+struct SpotifySearchResponse: Sendable, Codable {
+    let tracks: SpotifyTrackList?
 }
 
-public struct SpotifyTrackList: Sendable, Codable {
-    public let items: [SpotifyTrack]
+struct SpotifyTrackList: Sendable, Codable {
+    let items: [SpotifyTrack]
 }
 
-public struct SpotifyTrack: Sendable, Codable, Identifiable {
-    public let id: String
-    public let name: String 
-    public let artists: [SpotifyArtist]
-    public let album: SpotifyAlbum
-    public let externalIds: SpotifyExternalIDs?
-    public let externalUrls: SpotifyExternalURLs
-    public let durationMs: Int?
-    public let popularity: Int?
+struct SpotifyTrack: Sendable, Codable, Identifiable {
+    let id: String
+    let name: String 
+    let artists: [SpotifyArtist]
+    let album: SpotifyAlbum
+    let externalIds: SpotifyExternalIDs?
+    let externalUrls: SpotifyExternalURLs
+    let durationMs: Int?
+    let popularity: Int?
 
-    public var artistName: String { artists.first?.name ?? "Unknown Artist" }
+    var artistName: String { artists.first?.name ?? "Unknown Artist" }
 
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id, name, artists, album, popularity
         case externalIds = "external_ids"
         case externalUrls = "external_urls"
@@ -39,51 +39,51 @@ public struct SpotifyTrack: Sendable, Codable, Identifiable {
     }
 }
 
-public struct SpotifyArtist: Sendable, Codable {
-    public let id: String
-    public let name: String
-    public let genres: [String]?
-    public let popularity: Int?
+struct SpotifyArtist: Sendable, Codable {
+    let id: String
+    let name: String
+    let genres: [String]?
+    let popularity: Int?
 }
 
-public struct SpotifyArtistsResponse: Codable {
-    public let artists: [SpotifyArtist]
+struct SpotifyArtistsResponse: Codable {
+    let artists: [SpotifyArtist]
 }
 
-public struct SpotifyAlbumsResponse: Codable {
-    public let albums: [SpotifyAlbum]
+struct SpotifyAlbumsResponse: Codable {
+    let albums: [SpotifyAlbum]
 }
 
-public struct SpotifyAlbum: Sendable, Codable {
-    public let id: String
-    public let name: String
-    public let images: [SpotifyImage]
-    public let releaseDate: String
-    public let copyrights: [SpotifyCopyright]?
-    public let label: String?
+struct SpotifyAlbum: Sendable, Codable {
+    let id: String
+    let name: String
+    let images: [SpotifyImage]
+    let releaseDate: String
+    let copyrights: [SpotifyCopyright]?
+    let label: String?
 
-    public var artworkURL: URL? { URL(string: images.first?.url ?? "") }
+    var artworkURL: URL? { URL(string: images.first?.url ?? "") }
 
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case id, name, images, copyrights, label
         case releaseDate = "release_date"
     }
 }
 
-public struct SpotifyImage: Sendable, Codable {
-    public let url: String
+struct SpotifyImage: Sendable, Codable {
+    let url: String
 }
 
-public struct SpotifyExternalIDs: Sendable, Codable {
-    public let isrc: String?
+struct SpotifyExternalIDs: Sendable, Codable {
+    let isrc: String?
 }
 
-public struct SpotifyExternalURLs: Sendable, Codable {
-    public let spotify: String 
+struct SpotifyExternalURLs: Sendable, Codable {
+    let spotify: String 
 }
 
-public struct SpotifyCopyright: Sendable, Codable {
-    public let text: String
-    public let type: String
+struct SpotifyCopyright: Sendable, Codable {
+    let text: String
+    let type: String
 }
 
