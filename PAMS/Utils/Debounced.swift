@@ -2,16 +2,16 @@ import SwiftUI
 import Combine
 
 @propertyWrapper
-public struct Debounced<Value>: DynamicProperty {
+struct Debounced<Value>: DynamicProperty {
     @StateObject private var debouncer: Debouncer<Value>
-    public init(wrappedValue: Value, delay: TimeInterval) {
+    init(wrappedValue: Value, delay: TimeInterval) {
         _debouncer = StateObject(wrappedValue: Debouncer(initialValue: wrappedValue, delay: delay))
     }
-    public var wrappedValue: Value {
+    var wrappedValue: Value {
         get { debouncer.currentValue }
         nonmutating set { debouncer.update(newValue) }
     }
-    public var projectedValue: Binding<Value> {
+    var projectedValue: Binding<Value> {
         Binding(
             get: { wrappedValue },
             set: { wrappedValue = $0 }

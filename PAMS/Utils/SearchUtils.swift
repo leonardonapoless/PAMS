@@ -1,6 +1,6 @@
 import Foundation
 
-public class MusicSearchRanker {
+class MusicSearchRanker {
 
     private let stopWords: Set<String> = ["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with"]
 
@@ -31,9 +31,9 @@ public class MusicSearchRanker {
         let tokenSet: Set<String>
     }
     
-    public init() {}
+    init() {}
     
-    public func sortAndFilterTracks(tracks: [SpotifyTrack], term: String) -> [SpotifyTrack] {
+    func sortAndFilterTracks(tracks: [SpotifyTrack], term: String) -> [SpotifyTrack] {
         let query = processQuery(term: term)
 
         let scoredTracks = tracks.enumerated().map { index, track in

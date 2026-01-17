@@ -1,12 +1,12 @@
 import SwiftUI
 
-public struct ContentView: View {
+struct ContentView: View {
     @StateObject private var viewModel = SongViewModel()
     @State private var liveSearchTerm: String = ""
     @Debounced(wrappedValue: "", delay: 0.5) private var debouncedSearchTerm: String
     @State private var isTyping: Bool = false
     
-    public var body: some View {
+    var body: some View {
         VStack {
             HeaderView()
             NavigationView {

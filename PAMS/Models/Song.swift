@@ -1,12 +1,12 @@
 import Foundation
 
-public struct SongLink: Codable {
-    public let apple: String
-    public let spotify: String
-    public let tidal: String
-    public let youtube: String
+struct SongLink: Codable {
+    let apple: String
+    let spotify: String
+    let tidal: String
+    let youtube: String
 }
 
-public struct SongData: Codable {
-    public let songs: [String: SongLink]
+struct SongData: Codable {
+    let songs: [String: SongLink]
 }

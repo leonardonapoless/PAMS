@@ -1,6 +1,6 @@
 import Foundation
 
-public struct PlatformLink: Codable, Sendable, Equatable, Hashable {
-    public let webUrl: String?
-    public let nativeUrl: String?
+struct PlatformLink: Codable, Sendable, Equatable, Hashable {
+    let webUrl: String?
+    let nativeUrl: String?
 }
