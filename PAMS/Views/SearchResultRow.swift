@@ -18,7 +18,7 @@ struct SearchResultRow: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            ArtworkCard(isFocused: isFocused) {
+            CoverArtCard(isFocused: isFocused) {
                 if let url = result.artworkURL {
                     AsyncImage(url: url) { phase in
                         switch phase {

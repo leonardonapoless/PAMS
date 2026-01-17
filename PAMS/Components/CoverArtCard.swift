@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ArtworkCard<Front: View, Back: View>: View {
+struct CoverArtCard<Front: View, Back: View>: View {
     let front: Front
     let back: Back
     
@@ -145,9 +145,9 @@ struct AnimatedBorder: View {
     }
 }
 
-struct FlippableArtworkCard_Previews: PreviewProvider {
+struct CoverArtCard_Previews: PreviewProvider {
     static var previews: some View {
-        ArtworkCard {
+        CoverArtCard {
             Image(systemName: "music.note")
                 .resizable()
                 .scaledToFit()
