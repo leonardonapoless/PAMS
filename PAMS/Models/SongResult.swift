@@ -1,20 +1,20 @@
 import Foundation
 
-public struct SearchResult: Identifiable, Hashable, Sendable {
-    public let id: String
-    public let title: String
-    public let artist: String
-    public let releaseDate: String
-    public let album: String
-    public let genre: String
-    public let duration: String
-    public let recordLabel: String
-    public let copyright: String
-    public let artworkURL: URL?
-    public let isrc: String?
-    public var links: PlatformLinks
+struct SearchResult: Identifiable, Hashable, Sendable {
+    let id: String
+    let title: String
+    let artist: String
+    let releaseDate: String
+    let album: String
+    let genre: String
+    let duration: String
+    let recordLabel: String
+    let copyright: String
+    let artworkURL: URL?
+    let isrc: String?
+    var links: PlatformLinks
 
-    public init(
+    init(
         id: String,
         title: String,
         artist: String,

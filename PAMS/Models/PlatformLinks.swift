@@ -1,12 +1,12 @@
 import Foundation
 
-public struct PlatformLinks: Codable, Sendable, Equatable, Hashable {
-    public let apple: PlatformLink?
-    public let spotify: PlatformLink?
-    public let tidal: PlatformLink?
-    public let youtube: PlatformLink?
+struct PlatformLinks: Codable, Sendable, Equatable, Hashable {
+    let apple: PlatformLink?
+    let spotify: PlatformLink?
+    let tidal: PlatformLink?
+    let youtube: PlatformLink?
 
-    public init(apple: PlatformLink? = nil, spotify: PlatformLink? = nil, tidal: PlatformLink? = nil, youtube: PlatformLink? = nil) {
+    init(apple: PlatformLink? = nil, spotify: PlatformLink? = nil, tidal: PlatformLink? = nil, youtube: PlatformLink? = nil) {
         self.apple = apple
         self.spotify = spotify
         self.tidal = tidal

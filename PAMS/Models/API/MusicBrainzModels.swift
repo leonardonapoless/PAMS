@@ -1,30 +1,29 @@
 import Foundation
 
-// MARK: - MusicBrainz Credits Struct (Our Tidy Model)
-public struct MusicBrainzCredits: Sendable {
-    public let album: String?
-    public let releaseDate: String?
-    public let genre: String?
-    public let duration: String?
-    public let recordLabel: String?
-    public let copyright: String?
-    public static var empty: MusicBrainzCredits {
+struct MusicBrainzCredits: Sendable {
+    let album: String?
+    let releaseDate: String?
+    let genre: String?
+    let duration: String?
+    let recordLabel: String?
+    let copyright: String?
+    static var empty: MusicBrainzCredits {
         MusicBrainzCredits(album: nil, releaseDate: nil, genre: nil, duration: nil, recordLabel: nil, copyright: nil)
     }
 }
 
-// MARK: - MusicBrainz API Decoding Models (The "Blueprints")
-public struct MusicBrainzISRCResponse: Sendable, Codable {
-    public let recordings: [MusicBrainzRecording]
+// MARK: - MusicBrainz API Decoding Models 
+struct MusicBrainzISRCResponse: Sendable, Codable {
+    let recordings: [MusicBrainzRecording]
 }
 
-public struct MusicBrainzRecording: Sendable, Codable {
-    public let relations: [MusicBrainzRelation]?
-    public let releaseList: MusicBrainzReleaseList?
-    public let genres: [MusicBrainzGenre]?
-    public let length: Int?
+struct MusicBrainzRecording: Sendable, Codable {
+    let relations: [MusicBrainzRelation]?
+    let releaseList: MusicBrainzReleaseList?
+    let genres: [MusicBrainzGenre]?
+    let length: Int?
 
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case relations
         case releaseList = "release-list"
         case genres
@@ -32,17 +31,17 @@ public struct MusicBrainzRecording: Sendable, Codable {
     }
 }
 
-public struct MusicBrainzReleaseList: Sendable, Codable {
-    public let releases: [MusicBrainzRelease]?
+struct MusicBrainzReleaseList: Sendable, Codable {
+    let releases: [MusicBrainzRelease]?
 }
 
-public struct MusicBrainzRelease: Sendable, Codable {
-    public let title: String? 
-    public let date: String?  
-    public let labelInfo: [MusicBrainzLabelInfo]?
-    public let artistCredits: [MusicBrainzArtistCredit]?
+struct MusicBrainzRelease: Sendable, Codable {
+    let title: String? 
+    let date: String?  
+    let labelInfo: [MusicBrainzLabelInfo]?
+    let artistCredits: [MusicBrainzArtistCredit]?
 
-    public enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case title
         case date
         case labelInfo = "label-info"
@@ -50,25 +49,25 @@ public struct MusicBrainzRelease: Sendable, Codable {
     }
 }
 
-public struct MusicBrainzRelation: Sendable, Codable {
-    public let type: String 
-    public let artist: MusicBrainzArtistCredit
+struct MusicBrainzRelation: Sendable, Codable {
+    let type: String 
+    let artist: MusicBrainzArtistCredit
 }
 
-public struct MusicBrainzArtistCredit: Sendable, Codable {
-    public let name: String
-    public let joinphrase: String?
+struct MusicBrainzArtistCredit: Sendable, Codable {
+    let name: String
+    let joinphrase: String?
 }
 
-public struct MusicBrainzGenre: Sendable, Codable {
-    public let name: String
+struct MusicBrainzGenre: Sendable, Codable {
+    let name: String
 }
 
-public struct MusicBrainzLabelInfo: Sendable, Codable {
-    public let label: MusicBrainzLabel?
+struct MusicBrainzLabelInfo: Sendable, Codable {
+    let label: MusicBrainzLabel?
 }
 
-public struct MusicBrainzLabel: Sendable, Codable {
-    public let name: String
+struct MusicBrainzLabel: Sendable, Codable {
+    let name: String
 }
 

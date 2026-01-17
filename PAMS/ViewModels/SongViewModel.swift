@@ -2,17 +2,17 @@ import Foundation
 import Combine
 
 @MainActor
-public final class SongViewModel: ObservableObject {
+final class SongViewModel: ObservableObject {
 
-    @Published public private(set) var results: [SearchResult] = []
-    @Published public private(set) var isLoading: Bool = false
-    @Published public private(set) var errorMessage: String? 
+    @Published private(set) var results: [SearchResult] = []
+    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var errorMessage: String? 
 
     private let apiService = MusicAPIService.shared
     private let searchRanker = MusicSearchRanker()
     private var searchTask: Task<Void, Never>?
 
-    public func search(term: String) {
+    func search(term: String) {
         searchTask?.cancel() 
 
         let trimmed = term.trimmingCharacters(in: .whitespacesAndNewlines)
