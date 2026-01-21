@@ -57,18 +57,12 @@ struct ResultsListView: View {
     }
 
     func updateFocus(with preferences: [String: Double]) {
-        // If any card is > 95% visible, focus it.
-        // If multiple are, pick the first one (or could be all, but "focus" implies singular usually).
-        // My previous logic allowed multiple. Let's stick to singular for "focus" to be cleaner,
-        // or just pick the "most" visible one if none are fully visible.
-        
         let fullyVisibleThreshold = 0.95
         let fullyVisibleIDs = preferences.filter { $0.value >= fullyVisibleThreshold }.map { $0.key }
         
         if let firstFullyVisible = fullyVisibleIDs.first {
             focusedID = firstFullyVisible
         } else {
-            // Fallback to the most visible one
             if let max = preferences.max(by: { $0.value < $1.value }) {
                 focusedID = max.key
             } else {

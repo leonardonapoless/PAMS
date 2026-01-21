@@ -1,15 +1,7 @@
-
-
-
-
-
-
-
 import Foundation
 
 enum KeyManager {
 
-    
     private struct LoadedKeys {
         let spotifyClientID: String
         let spotifyClientSecret: String
@@ -21,7 +13,6 @@ enum KeyManager {
         let configVersion: String?
     }
 
-    
     private static var loaded: LoadedKeys?
 
     // MARK: - Bootstrap
@@ -66,7 +57,6 @@ enum KeyManager {
     }
 
     // MARK: - Internal loading (MainActor)
-
     
     private static var cachedKeys: [String: Any]?
 
@@ -115,10 +105,7 @@ enum KeyManager {
     static var spotifyTokenRefreshURL: URL? {
         loaded?.spotifyTokenRefreshURL
     }
-
-    
     
     static let musicBrainzUserAgent = "PAMS/1.0 (https://github.com/leonardonapoless)"
-
 }
 

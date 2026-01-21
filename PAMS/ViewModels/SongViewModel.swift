@@ -31,7 +31,6 @@ final class SongViewModel: ObservableObject {
             do {
                 var spotifyTracks = try await apiService.searchSpotify(term: trimmed)
                 
-                // enrich tracks with full artist and album details
                 let artistIDs = Set(spotifyTracks.compactMap { $0.artists.first?.id })
                 let albumIDs = Set(spotifyTracks.map { $0.album.id })
                 
@@ -69,7 +68,6 @@ final class SongViewModel: ObservableObject {
                     let fullArtist = firstArtistID != nil ? fullArtists[firstArtistID!] : nil
                     let fullAlbum = fullAlbums[track.album.id]
                     
-                    // create a new track with the enriched artist and album
                     return SpotifyTrack(
                         id: track.id,
                         name: track.name,
