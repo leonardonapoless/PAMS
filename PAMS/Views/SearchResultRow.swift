@@ -2,10 +2,7 @@ import SwiftUI
 import UIKit
 
 struct SearchResultRow: View {
-    @Environment(\.openURL) var openURL
-    @Environment(\.colorScheme) var colorScheme
-
-    let result: SearchResult
+    let item: SearchResultItem
     let isFocused: Bool
     let listFrame: CGRect
     
@@ -17,9 +14,92 @@ struct SearchResultRow: View {
     let iconYTBlack: String
 
     var body: some View {
+        switch item {
+        case .track(let track):
+            MediaResultRow(
+                id: track.id,
+                title: track.title,
+                subtitle: track.artist,
+                artworkURL: track.artworkURL,
+                links: track.links,
+                isLoading: track.isLoading,
+                metadata: [
+                    ("Release Date", track.releaseDate),
+                    ("Album", track.album),
+                    ("Genre", track.genre),
+                    ("Duration", track.duration),
+                    ("Label", track.recordLabel),
+                    ("©", track.copyright)
+                ],
+                isFocused: isFocused,
+                listFrame: listFrame,
+                iconConfig: iconConfig,
+                showAlbumBadge: false
+            )
+        case .album(let album):
+            MediaResultRow(
+                id: album.id,
+                title: album.title,
+                subtitle: album.artist,
+                artworkURL: album.artworkURL,
+                links: album.links,
+                isLoading: album.isLoading,
+                metadata: [
+                    ("Release Date", album.releaseDate),
+                    ("Genre", album.genre),
+                    ("", album.totalTracks), 
+                    ("Label", album.recordLabel),
+                    ("©", album.copyright)
+                ],
+                isFocused: isFocused,
+                listFrame: listFrame,
+                iconConfig: iconConfig,
+                showAlbumBadge: true
+            )
+        }
+    }
+    
+    private var iconConfig: MediaResultRow.IconConfig {
+        MediaResultRow.IconConfig(
+            spotifyBlack: iconSpotifyBlack,
+            spotifyWhite: iconSpotifyWhite,
+            tidalBlack: iconTidalBlack,
+            tidalWhite: iconTidalWhite,
+            ytWhite: iconYTWhite,
+            ytBlack: iconYTBlack
+        )
+    }
+}
+
+struct MediaResultRow: View {
+    struct IconConfig {
+        let spotifyBlack: String
+        let spotifyWhite: String
+        let tidalBlack: String
+        let tidalWhite: String
+        let ytWhite: String
+        let ytBlack: String
+    }
+    
+    let id: String
+    let title: String
+    let subtitle: String
+    let artworkURL: URL?
+    let links: PlatformLinks
+    let isLoading: Bool
+    let metadata: [(String, String)]
+    let isFocused: Bool
+    let listFrame: CGRect
+    let iconConfig: IconConfig
+    let showAlbumBadge: Bool
+    
+    @Environment(\.openURL) var openURL
+    @Environment(\.colorScheme) var colorScheme
+    
+    var body: some View {
         VStack(spacing: 12) {
             CoverArtCard(isFocused: isFocused) {
-                if let url = result.artworkURL {
+                if let url = artworkURL {
                     AsyncImage(url: url) { phase in
                         switch phase {
                         case .success(let image):
@@ -35,62 +115,70 @@ struct SearchResultRow: View {
                 } else {
                     Color.secondary.opacity(0.1)
                 }
+
             } back: {
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Release Date: \(result.releaseDate)")
-                    Divider()
-                    Text("Album: \(result.album)")
-                    Divider()
-                    Text("Genre: \(result.genre)")
-                    Divider()
-                    Text("Duration: \(result.duration)")
-                    Divider()
-                    Text("Label: \(result.recordLabel)")
-                    Divider()
-                    Text("© \(result.copyright)")
+                    ForEach(metadata, id: \.0) { key, value in
+                        if !value.isEmpty && value != "n/a" {
+                            if key == "©" || key.isEmpty {
+                                Text(value)
+                            } else {
+                                Text("\(key): \(value)")
+                            }
+                            Divider()
+                        }
+                    }
                 }
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
-                .lineLimit(2)
+                .lineLimit(4)
                 .truncationMode(.tail)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding()
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color(.systemGray6))
+            } badge: {
+                if showAlbumBadge {
+                    AlbumBadgeView()
+                }
             }
             .frame(width: 280, height: 280)
 
             VStack(spacing: 4) {
-                Text(result.title)
+                Text(title)
                     .font(.headline)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(result.artist)
+                Text(subtitle)
                     .font(.subheadline)
                     .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 32)
-
+            
             HStack(spacing: 18) {
                 PlatformButton(icon: .system("applelogo"), size: 44) {
-                    open(link: result.links.apple)
+                    open(link: links.apple)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconSpotifyWhite : iconSpotifyBlack), size: 44) {
-                    open(link: result.links.spotify)
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.spotifyWhite : iconConfig.spotifyBlack), size: 44) {
+                    open(link: links.spotify)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconTidalWhite : iconTidalBlack), size: 44) {
-                    open(link: result.links.tidal)
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.tidalWhite : iconConfig.tidalBlack), size: 44) {
+                    open(link: links.tidal)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconYTWhite : iconYTBlack), size: 44) {
-                    open(link: result.links.youtube)
+                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.ytWhite : iconConfig.ytBlack), size: 44) {
+                    open(link: links.youtube)
                 }
             }
             .font(.title3)
+            .opacity(isLoading ? 0.4 : 1)
+            .allowsHitTesting(!isLoading)
+            .animation(.easeInOut(duration: 0.3), value: isLoading)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 20)
@@ -99,12 +187,12 @@ struct SearchResultRow: View {
                 Color.clear
                     .preference(
                         key: VisibilityPreferenceKey.self,
-                        value: [result.id: calculateVisibility(geometry: geometry)]
+                        value: [id: calculateVisibility(geometry: geometry)]
                     )
             }
         }
     }
-
+    
     func open(link: PlatformLink?) {
         guard let link else { return }
 
@@ -127,6 +215,7 @@ struct SearchResultRow: View {
         let visibleArea = intersection.width * intersection.height
         let totalArea = frame.width * frame.height
         
-        return totalArea > 0 ? Double(visibleArea / totalArea) : 0
+        let percentage = totalArea > 0 ? Double(visibleArea / totalArea) : 0
+        return (percentage * 100).rounded() / 100
     }
 }

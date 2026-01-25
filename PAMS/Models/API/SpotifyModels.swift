@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - Spotify API Models
+
 struct SpotifyTokenResponse: Sendable, Codable {
     let accessToken: String
     let expiresIn: Int
@@ -13,6 +13,11 @@ struct SpotifyTokenResponse: Sendable, Codable {
 
 struct SpotifySearchResponse: Sendable, Codable {
     let tracks: SpotifyTrackList?
+    let albums: SpotifyAlbumList?
+}
+
+struct SpotifyAlbumList: Sendable, Codable {
+    let items: [SpotifyAlbum]
 }
 
 struct SpotifyTrackList: Sendable, Codable {
@@ -61,12 +66,19 @@ struct SpotifyAlbum: Sendable, Codable {
     let releaseDate: String
     let copyrights: [SpotifyCopyright]?
     let label: String?
+    let artists: [SpotifyArtist]
+    let externalUrls: SpotifyExternalURLs?
+    let totalTracks: Int?
+    let genres: [String]?
 
     var artworkURL: URL? { URL(string: images.first?.url ?? "") }
+    var artistName: String { artists.first?.name ?? "Unknown Artist" }
 
     enum CodingKeys: String, CodingKey {
-        case id, name, images, copyrights, label
+        case id, name, images, copyrights, label, artists, genres
         case releaseDate = "release_date"
+        case externalUrls = "external_urls"
+        case totalTracks = "total_tracks"
     }
 }
 

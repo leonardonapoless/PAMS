@@ -20,9 +20,10 @@ struct PlatformButton: View {
                 .frame(width: effectiveIconSize, height: effectiveIconSize)
                 .offset(iconOffset)
         }
+        .compositingGroup()
         .frame(width: size, height: size)
         .buttonStyle(.glass)
-        .shadow(color: colorScheme == .dark ? .white.opacity(0.02) : .black.opacity(0.05), radius: 1.2, x: 0, y: 1)
+        .shadow(color: colorScheme == .dark ? .white.opacity(0.08) : .black.opacity(0.15), radius: 4, x: 0, y: 2)
         .accessibilityLabel(accessibilityLabel ?? "")
     }
 

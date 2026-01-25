@@ -9,7 +9,7 @@ struct HeaderView: View {
                     .monospaced()
                     .font(.largeTitle)
 
-                AnimatedPatternView(strokeWidth: 2)
+                LogoPatternView(strokeWidth: 2)
                     .frame(width: 30, height: 30)
                     .padding(.leading, -4)
                     .padding(.top, 8)

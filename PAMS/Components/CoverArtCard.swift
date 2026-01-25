@@ -1,8 +1,9 @@
 import SwiftUI
 
-struct CoverArtCard<Front: View, Back: View>: View {
+struct CoverArtCard<Front: View, Back: View, Badge: View>: View {
     let front: Front
     let back: Back
+    let badge: Badge
     
     let cornerRadius: CGFloat
     let strokeWidth: CGFloat
@@ -13,6 +14,7 @@ struct CoverArtCard<Front: View, Back: View>: View {
     
     @Environment(\.colorScheme) var colorScheme
     @State var rotation: Double = 0
+    @State private var feedbackTrigger = false
     
     init(
         cornerRadius: CGFloat = 32,
@@ -23,7 +25,8 @@ struct CoverArtCard<Front: View, Back: View>: View {
         outerAnimationSpeed: Double = 18,
         isFocused: Bool = true,
         @ViewBuilder front: () -> Front,
-        @ViewBuilder back: () -> Back
+        @ViewBuilder back: () -> Back,
+        @ViewBuilder badge: () -> Badge = { EmptyView() }
     ) {
         self.cornerRadius = cornerRadius
         self.strokeWidth = strokeWidth
@@ -33,6 +36,7 @@ struct CoverArtCard<Front: View, Back: View>: View {
         self.isFocused = isFocused
         self.front = front()
         self.back = back()
+        self.badge = badge()
     }
     
     var isFaceUp: Bool {
@@ -49,13 +53,24 @@ struct CoverArtCard<Front: View, Back: View>: View {
         .onTapGesture {
             withAnimation(.bouncy(duration: 0.6)) {
                 rotation += 180
+                feedbackTrigger.toggle()
             }
         }
-        .sensoryFeedback(.impact(weight: .light), trigger: rotation)
+        .sensoryFeedback(.impact(weight: .light), trigger: feedbackTrigger)
+        .onDisappear {
+            var transaction = Transaction(animation: nil)
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                rotation = 0
+            }
+        }
     }
     
     var cardFront: some View {
         cardBody(front)
+            .overlay(alignment: .topTrailing) {
+                badge
+            }
             .opacity(isFaceUp ? 1 : 0)
     }
     
@@ -142,6 +157,33 @@ struct AnimatedBorder: View {
         withAnimation(.default) {
             phase = 0
         }
+    }
+}
+
+extension CoverArtCard where Badge == EmptyView {
+    init(
+        cornerRadius: CGFloat = 32,
+        strokeWidth: CGFloat = 1,
+        innerPadding: CGFloat = 8,
+        outerPadding: CGFloat = 14,
+        innerAnimationSpeed: Double = 12,
+        outerAnimationSpeed: Double = 18,
+        isFocused: Bool = true,
+        @ViewBuilder front: () -> Front,
+        @ViewBuilder back: () -> Back
+    ) {
+        self.init(
+            cornerRadius: cornerRadius,
+            strokeWidth: strokeWidth,
+            innerPadding: innerPadding,
+            outerPadding: outerPadding,
+            innerAnimationSpeed: innerAnimationSpeed,
+            outerAnimationSpeed: outerAnimationSpeed,
+            isFocused: isFocused,
+            front: front,
+            back: back,
+            badge: { EmptyView() }
+        )
     }
 }
 

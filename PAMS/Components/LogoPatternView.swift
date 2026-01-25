@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct AnimatedPatternView: View {
-    @State private var progress: CGFloat = 0
+struct LogoPatternView: View {
+
     @Environment(\.colorScheme) var colorScheme
     let strokeWidth: CGFloat
     
@@ -16,47 +16,51 @@ struct AnimatedPatternView: View {
         self.enableHaptics = enableHaptics
     }
 
-    var body: some View {
-        GreekKeyShape()
-            .trim(from: 0, to: progress)
-            .stroke(colorScheme == .dark ? Color.white : Color.black, style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round))
-            .onAppear {
-                startAnimation()
-                
-                if enableHaptics {
-                    startHapticLoop()
-                }
+    enum AnimationPhase: CaseIterable {
+        case draw, hold, erase, pause
+        
+        var progress: CGFloat {
+            switch self {
+            case .draw, .hold: 1
+            case .erase, .pause: 0
             }
-            .onDisappear {
+        }
+    }
+
+    var body: some View {
+        PhaseAnimator(AnimationPhase.allCases, content: { phase in
+            LogoShape()
+                .trim(from: 0, to: phase.progress)
+                .stroke(
+                    colorScheme == .dark ? Color.white : Color.black,
+                    style: StrokeStyle(lineWidth: strokeWidth, lineCap: .round, lineJoin: .round)
+                )
+        }, animation: { phase in
+            switch phase {
+            case .draw: .easeInOut(duration: 3.0)
+            case .hold: .linear(duration: 0.2)
+            case .erase: .easeInOut(duration: 5.0)
+            case .pause: .linear(duration: 0.3)
+            }
+        })
+        .onAppear {
+            if enableHaptics {
+                startHapticLoop()
+            }
+        }
+        .onDisappear {
+            stopHapticLoop()
+        }
+        .onChange(of: enableHaptics) { _, newIsHapticsEnabled in
+            if newIsHapticsEnabled {
+                startHapticLoop()
+            } else {
                 stopHapticLoop()
             }
-            .onChange(of: enableHaptics) { _, newIsHapticsEnabled in
-                if newIsHapticsEnabled {
-                        startHapticLoop()
-                } else {
-                    stopHapticLoop()
-                }
-            }
-
-            .sensoryFeedback(.impact(weight: .heavy, intensity: 0.7), trigger: hapticTrigger)
+        }
+        .sensoryFeedback(.impact(weight: .heavy, intensity: 0.7), trigger: hapticTrigger)
     }
 
-    private func startAnimation() {
-        withAnimation(.easeInOut(duration: 3)) {
-            progress = 1
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.2) {
-            withAnimation(.easeInOut(duration: 5)) {
-                progress = 0
-            }
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 8.5) {
-            startAnimation()
-        }
-    }
-    
     private func startHapticLoop() {
         guard !isHapticLoopActive else { return }
         isHapticLoopActive = true
@@ -88,7 +92,7 @@ struct AnimatedPatternView: View {
     }
 }
 
-struct GreekKeyShape: Shape {
+struct LogoShape: Shape {
     func path(in rect: CGRect) -> Path {
         let width = rect.width
         let height = rect.height
@@ -125,5 +129,5 @@ struct GreekKeyShape: Shape {
 }
 
 #Preview {
-    AnimatedPatternView()
+    LogoPatternView()
 }

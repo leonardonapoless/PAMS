@@ -31,19 +31,55 @@ class MusicSearchRanker {
         let tokenSet: Set<String>
     }
     
+    private let relevanceThreshold: Double = 1.0
+    
     init() {}
     
-    func sortAndFilterTracks(tracks: [SpotifyTrack], term: String) -> [SpotifyTrack] {
+    enum RankedItem {
+        case track(SpotifyTrack, Double)
+        case album(SpotifyAlbum, Double)
+        
+        var score: Double {
+            switch self {
+            case .track(_, let s): return s
+            case .album(_, let s): return s
+            }
+        }
+    }
+
+    struct SearchResult {
+        let items: [RankedItem]
+        let hasRelevantResults: Bool
+    }
+    
+    func sortAndFilter(tracks: [SpotifyTrack], albums: [SpotifyAlbum], term: String) -> SearchResult {
         let query = processQuery(term: term)
 
-        let scoredTracks = tracks.enumerated().map { index, track in
-            let score = calculateRelevanceScore(for: track, query: query, originalIndex: index, totalTracks: tracks.count)
-            return (track: track, score: score)
+        var rankedItems: [RankedItem] = []
+        
+
+        for (index, track) in tracks.enumerated() {
+            let score = calculateTrackScore(track, query: query, originalIndex: index, totalItems: tracks.count)
+            if score > 0 {
+                rankedItems.append(.track(track, score))
+            }
+        }
+        
+
+        for (index, album) in albums.enumerated() {
+            let score = calculateAlbumScore(album, query: query, originalIndex: index, totalItems: albums.count)
+            if score > 0 {
+                rankedItems.append(.album(album, score))
+            }
         }
 
-        let sortedScoredTracks = scoredTracks.sorted { $0.score > $1.score }
-
-        return sortedScoredTracks.map { $0.track }
+        let sorted = rankedItems.sorted { $0.score > $1.score }
+        let bestScore = sorted.first?.score ?? 0
+        
+        return SearchResult(
+            items: sorted,
+            hasRelevantResults: bestScore >= relevanceThreshold
+        )
     }
 
     private func processQuery(term: String) -> ProcessedQuery {
@@ -56,30 +92,27 @@ class MusicSearchRanker {
         )
     }
 
-    private func calculateRelevanceScore(for track: SpotifyTrack, query: ProcessedQuery, originalIndex: Int, totalTracks: Int) -> Double {
-        let trackNameTokens = tokenize(track.name)
-        let artistNameTokens = tokenize(track.artistName)
-        let albumNameTokens = tokenize(track.album.name)
+    private func calculateTrackScore(_ track: SpotifyTrack, query: ProcessedQuery, originalIndex: Int, totalItems: Int) -> Double {
+        let titleTokens = tokenize(track.name)
+        let artistTokens = tokenize(track.artistName)
+        let albumTokens = tokenize(track.album.name)
 
-        let titleScore = calculateFieldScore(query: query, fieldTokens: trackNameTokens)
-        let artistScore = calculateFieldScore(query: query, fieldTokens: artistNameTokens)
-        let albumScore = calculateFieldScore(query: query, fieldTokens: albumNameTokens)
+        let titleScore = calculateFieldScore(query: query, fieldTokens: titleTokens)
+        let artistScore = calculateFieldScore(query: query, fieldTokens: artistTokens)
+        let albumScore = calculateFieldScore(query: query, fieldTokens: albumTokens)
 
         var textScore = (titleScore * titleWeight) +
                          (artistScore * artistWeight) +
                          (albumScore * albumWeight)
-        
+
         if titleScore > 0 && artistScore > 0 {
             textScore += 1.0
         }
         
-        if textScore == 0 {
-            return 0
-        }
-
-        let titleWordCount = Double(trackNameTokens.count)
-        let queryWordCount = Double(query.tokens.count)
+        if textScore == 0 { return 0 }
         
+        let titleWordCount = Double(titleTokens.count)
+        let queryWordCount = Double(query.tokens.count)
         if titleWordCount > queryWordCount {
             let diff = titleWordCount - queryWordCount
             let penalty = pow(0.9, diff)
@@ -96,10 +129,40 @@ class MusicSearchRanker {
                 popScore += popularArtistBonus
             }
         }
-        
-        let rankScore = (1.0 - (Double(originalIndex) / Double(totalTracks))) * originalRankWeight
+        let rankScore = (1.0 - (Double(originalIndex) / Double(totalItems))) * originalRankWeight
 
         return textScore * (1.0 + popScore + rankScore)
+    }
+
+    private func calculateAlbumScore(_ album: SpotifyAlbum, query: ProcessedQuery, originalIndex: Int, totalItems: Int) -> Double {
+        let titleTokens = tokenize(album.name)
+        let artistTokens = tokenize(album.artistName)
+        
+        let titleScore = calculateFieldScore(query: query, fieldTokens: titleTokens)
+        let artistScore = calculateFieldScore(query: query, fieldTokens: artistTokens)
+        
+        
+        var textScore = (titleScore * 0.7) + (artistScore * 0.3)
+        
+        if titleScore > 0 && artistScore > 0 {
+            textScore += 1.2 
+        }
+        
+        if textScore == 0 { return 0 }
+        
+        let titleWordCount = Double(titleTokens.count)
+        let queryWordCount = Double(query.tokens.count)
+        if titleWordCount > queryWordCount {
+             let diff = titleWordCount - queryWordCount
+             let penalty = pow(0.85, diff) 
+             textScore *= penalty
+        }
+        
+        
+        let albumEfficiencyBonus = 0.5
+        let rankScore = (1.0 - (Double(originalIndex) / Double(totalItems))) * originalRankWeight
+
+        return textScore * (1.0 + albumEfficiencyBonus + rankScore)
     }
 
     private func calculateFieldScore(query: ProcessedQuery, fieldTokens: [String]) -> Double {
@@ -149,7 +212,6 @@ class MusicSearchRanker {
 
         let tokens = result.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
         
-        // Filter stop words, ignored words, and 4-digit years
         let filteredTokens = tokens.filter { token in
             if stopWords.contains(token) { return false }
             if ignoredWords.contains(token) { return false }
@@ -203,4 +265,3 @@ class MusicSearchRanker {
         return previousRow[bCount]
     }
 }
-

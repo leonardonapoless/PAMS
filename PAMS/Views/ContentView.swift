@@ -13,9 +13,9 @@ struct ContentView: View {
                 ZStack {
                     resultsListView
                     if viewModel.isLoading {
-                        AnimatedPatternView(strokeWidth: 4, enableHaptics: !isTyping)
+                        LogoPatternView(strokeWidth: 4, enableHaptics: !isTyping)
                             .frame(width: 80, height: 80)
-                            .zIndex(1)
+                            .zIndex(2)
                     }
                 }
                 .searchable(text: $liveSearchTerm, prompt: "Search Song or Album")
@@ -24,15 +24,15 @@ struct ContentView: View {
                     debouncedSearchTerm = newValue
                 }
                 .onChange(of: debouncedSearchTerm) { _, newValue in
-                                    isTyping = false 
-                                    viewModel.search(term: newValue)
-                                }
+                    isTyping = false
+                    viewModel.search(term: newValue)
+                }
             }
         }
     }
-
+    
     private var resultsListView: some View {
-        ResultsListView(results: viewModel.results, isLoading: viewModel.isLoading)
+        ResultsListView(results: viewModel.results, isLoading: viewModel.isLoading, status: viewModel.status)
     }
 }
 
