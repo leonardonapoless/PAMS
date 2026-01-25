@@ -1,5 +1,45 @@
 import Foundation
 
+// MARK: - Endpoints
+
+private enum SpotifyEndpoint {
+    static let api = "https://api.spotify.com/v1"
+    static let auth = URL(string: "https://accounts.spotify.com/api/token")!
+    
+    case search, track(String), albums, artists
+    
+    var url: URL {
+        switch self {
+        case .search: URL(string: "\(Self.api)/search")!
+        case .track(let id): URL(string: "\(Self.api)/tracks/\(id)")!
+        case .albums: URL(string: "\(Self.api)/albums")!
+        case .artists: URL(string: "\(Self.api)/artists")!
+        }
+    }
+}
+
+// MARK: - Errors
+
+enum MusicAPIError: Error, LocalizedError {
+    case unauthorized
+    case rateLimited
+    case network(URLError)
+    case decoding(Error)
+    case invalidResponse(Int)
+    
+    var errorDescription: String? {
+        switch self {
+        case .unauthorized: "Session expired"
+        case .rateLimited: "Too many requests. Try again shortly"
+        case .network: "No internet connection"
+        case .decoding: "Failed to parse response"
+        case .invalidResponse(let code): "Server error (\(code))"
+        }
+    }
+}
+
+// MARK: - Service
+
 @MainActor
 class MusicAPIService {
     static let shared = MusicAPIService()
@@ -8,103 +48,87 @@ class MusicAPIService {
     private var tokenExpiryTime = Date.distantPast
     private let musicBrainzUserAgent = "PAMS/1.0 ( https://github.com/leonardonapoless )"
 
-    func searchSpotify(term: String) async throws -> [SpotifyTrack] {
-        guard let token = try await getSpotifyToken() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+    func searchSpotify(term: String) async throws -> (tracks: [SpotifyTrack], albums: [SpotifyAlbum]) {
+        let token = try await getSpotifyToken()
 
-        var urlComponents = URLComponents(string: "https://api.spotify.com/v1/search")!
-        urlComponents.queryItems = [
+        var components = URLComponents(url: SpotifyEndpoint.search.url, resolvingAgainstBaseURL: false)!
+        components.queryItems = [
             URLQueryItem(name: "q", value: term),
-            URLQueryItem(name: "type", value: "track"),
-            URLQueryItem(name: "limit", value: "50")
+            URLQueryItem(name: "type", value: "track,album"),
+            URLQueryItem(name: "limit", value: "20")
         ]
 
-        guard let url = urlComponents.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 
-        let (data, response) = try await httpClient.data(for: request)
+        let (data, response) = try await performRequest(request)
+        try validate(response)
 
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        do {
+            let result = try JSONDecoder().decode(SpotifySearchResponse.self, from: data)
+            return (
+                tracks: result.tracks?.items ?? [],
+                albums: result.albums?.items ?? []
+            )
+        } catch {
+            throw MusicAPIError.decoding(error)
         }
-
-        let decoder = JSONDecoder()
-        let responseModel = try decoder.decode(SpotifySearchResponse.self, from: data)
-
-        return responseModel.tracks?.items ?? []
     }
 
     func getSpotifyTrack(id: String) async throws -> SpotifyTrack? {
-        guard let token = try await getSpotifyToken() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        let token = try await getSpotifyToken()
 
-        let urlComponents = URLComponents(string: "https://api.spotify.com/v1/tracks/\(id)")!
-        guard let url = urlComponents.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: SpotifyEndpoint.track(id).url)
         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 
-        let (data, response) = try await httpClient.data(for: request)
+        let (data, response) = try await performRequest(request)
+        try validate(response)
 
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        do {
+            return try JSONDecoder().decode(SpotifyTrack.self, from: data)
+        } catch {
+            throw MusicAPIError.decoding(error)
         }
-
-        return try JSONDecoder().decode(SpotifyTrack.self, from: data)
     }
 
     func getSpotifyAlbums(ids: [String]) async throws -> [SpotifyAlbum] {
         guard !ids.isEmpty else { return [] }
-        guard let token = try await getSpotifyToken() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        let token = try await getSpotifyToken()
 
-        let idsString = ids.joined(separator: ",")
-        var urlComponents = URLComponents(string: "https://api.spotify.com/v1/albums")!
-        urlComponents.queryItems = [URLQueryItem(name: "ids", value: idsString)]
+        var components = URLComponents(url: SpotifyEndpoint.albums.url, resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "ids", value: ids.joined(separator: ","))]
 
-        guard let url = urlComponents.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 
-        let (data, response) = try await httpClient.data(for: request)
+        let (data, response) = try await performRequest(request)
+        try validate(response)
 
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        do {
+            return try JSONDecoder().decode(SpotifyAlbumsResponse.self, from: data).albums
+        } catch {
+            throw MusicAPIError.decoding(error)
         }
-
-        let responseModel = try JSONDecoder().decode(SpotifyAlbumsResponse.self, from: data)
-        return responseModel.albums
     }
 
     func getSpotifyArtists(ids: [String]) async throws -> [SpotifyArtist] {
         guard !ids.isEmpty else { return [] }
-        guard let token = try await getSpotifyToken() else {
-            throw URLError(.userAuthenticationRequired)
-        }
+        let token = try await getSpotifyToken()
 
-        let idsString = ids.joined(separator: ",")
-        var urlComponents = URLComponents(string: "https://api.spotify.com/v1/artists")!
-        urlComponents.queryItems = [URLQueryItem(name: "ids", value: idsString)]
+        var components = URLComponents(url: SpotifyEndpoint.artists.url, resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "ids", value: ids.joined(separator: ","))]
 
-        guard let url = urlComponents.url else { throw URLError(.badURL) }
-
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: components.url!)
         request.setValue("Bearer \(token.accessToken)", forHTTPHeaderField: "Authorization")
 
-        let (data, response) = try await httpClient.data(for: request)
+        let (data, response) = try await performRequest(request)
+        try validate(response)
 
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.badServerResponse)
+        do {
+            return try JSONDecoder().decode(SpotifyArtistsResponse.self, from: data).artists
+        } catch {
+            throw MusicAPIError.decoding(error)
         }
-
-        let responseModel = try JSONDecoder().decode(SpotifyArtistsResponse.self, from: data)
-        return responseModel.artists
     }
 
 
@@ -157,7 +181,10 @@ class MusicAPIService {
         let album = release?.title
         let releaseDate = release?.date
         let recordLabel = release?.labelInfo?.first?.label?.name
-        let copyright = release?.artistCredits?.map { "\($0.name)\($0.joinphrase ?? "")" }.joined()
+        let copyright = release?.artistCredits?.map { credit in
+            let raw = "\(credit.name)\(credit.joinphrase ?? "")"
+            return raw.cleanedCopyright
+        }.joined()
 
         return MusicBrainzCredits(
             album: album,
@@ -169,39 +196,61 @@ class MusicAPIService {
         )
     }
 
-    private func getSpotifyToken() async throws -> SpotifyTokenResponse? {
+    // MARK: - Helpers
+
+    private func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        do {
+            return try await httpClient.data(for: request)
+        } catch let error as URLError where error.code == .cancelled {
+            throw error
+        } catch let error as URLError {
+            throw MusicAPIError.network(error)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            throw MusicAPIError.network(URLError(.notConnectedToInternet))
+        }
+    }
+
+    private func validate(_ response: URLResponse) throws {
+        guard let http = response as? HTTPURLResponse else {
+            throw MusicAPIError.invalidResponse(0)
+        }
+        switch http.statusCode {
+        case 200...299: return
+        case 401: throw MusicAPIError.unauthorized
+        case 429: throw MusicAPIError.rateLimited
+        default: throw MusicAPIError.invalidResponse(http.statusCode)
+        }
+    }
+
+    private func getSpotifyToken() async throws -> SpotifyTokenResponse {
         if let token = spotifyToken, tokenExpiryTime > Date() {
             return token
         }
 
-        let clientID = KeyManager.spotifyClientID
-        let clientSecret = KeyManager.spotifyClientSecret
-
-        guard let authString = "\(clientID):\(clientSecret)".data(using: .utf8) else {
-            throw URLError(.badURL)
+        let creds = "\(KeyManager.spotifyClientID):\(KeyManager.spotifyClientSecret)"
+        guard let authData = creds.data(using: .utf8) else {
+            throw MusicAPIError.unauthorized
         }
-        
-        let base64AuthString = authString.base64EncodedString()
-        let url = URL(string: "https://accounts.spotify.com/api/token")!
-        
-        var request = URLRequest(url: url)
+
+        var request = URLRequest(url: SpotifyEndpoint.auth)
         request.httpMethod = "POST"
-        request.setValue("Basic \(base64AuthString)", forHTTPHeaderField: "Authorization")
+        request.setValue("Basic \(authData.base64EncodedString())", forHTTPHeaderField: "Authorization")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.httpBody = "grant_type=client_credentials".data(using: .utf8)
-        
-        let (data, response) = try await httpClient.data(for: request)
 
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
-            throw URLError(.userAuthenticationRequired)
+        let (data, response) = try await performRequest(request)
+        try validate(response)
+
+        do {
+            let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
+            self.spotifyToken = tokenResponse
+            self.tokenExpiryTime = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 300))
+            return tokenResponse
+        } catch {
+            throw MusicAPIError.decoding(error)
         }
-
-        let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
-        
-        self.spotifyToken = tokenResponse
-        self.tokenExpiryTime = Date().addingTimeInterval(TimeInterval(tokenResponse.expiresIn - 300))
-
-        return tokenResponse
     }
 }
 

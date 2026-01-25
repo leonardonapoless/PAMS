@@ -56,7 +56,7 @@ enum KeyManager {
         )
     }
 
-    // MARK: - Internal loading (MainActor)
+    // MARK: - Internal Loading
     
     private static var cachedKeys: [String: Any]?
 
@@ -78,7 +78,7 @@ enum KeyManager {
         fatalError("CRITICAL: Configuration plist not found.")
     }
 
-    // MARK: - Public accessors (usable from any actor after bootstrap)
+    // MARK: - Public Accessors
 
     static var spotifyClientID: String {
         guard let l = loaded else {
