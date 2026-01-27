@@ -18,7 +18,7 @@ struct AlbumBadgeView: View {
                 .rotationEffect(.degrees(-110))
                 .offset(x: 10, y: 4)
            
-            ForEach(Array(textData.enumerated()), id: \.offset) { index, item in
+            ForEach(Array(textData.enumerated()), id: \.offset) { _, item in
                 let (symbol, angleOffset) = item
                 Text(symbol)
                     .font(.system(size: 11, weight: .bold))
