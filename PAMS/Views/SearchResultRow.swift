@@ -162,16 +162,16 @@ struct MediaResultRow: View {
             .padding(.horizontal, 32)
             
             HStack(spacing: 18) {
-                PlatformButton(icon: .system("applelogo"), size: 44) {
+                PlatformButtonStack(icon: .system("applelogo"), size: 44, link: links.apple) {
                     open(link: links.apple)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.spotifyWhite : iconConfig.spotifyBlack), size: 44) {
+                PlatformButtonStack(icon: .asset(colorScheme == .dark ? iconConfig.spotifyWhite : iconConfig.spotifyBlack), size: 44, link: links.spotify) {
                     open(link: links.spotify)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.tidalWhite : iconConfig.tidalBlack), size: 44) {
+                PlatformButtonStack(icon: .asset(colorScheme == .dark ? iconConfig.tidalWhite : iconConfig.tidalBlack), size: 44, link: links.tidal) {
                     open(link: links.tidal)
                 }
-                PlatformButton(icon: .asset(colorScheme == .dark ? iconConfig.ytWhite : iconConfig.ytBlack), size: 44) {
+                PlatformButtonStack(icon: .asset(colorScheme == .dark ? iconConfig.ytWhite : iconConfig.ytBlack), size: 44, link: links.youtube) {
                     open(link: links.youtube)
                 }
             }
