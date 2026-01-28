@@ -100,24 +100,28 @@ struct MediaResultRow: View {
         VStack(spacing: 12) {
             CoverArtCard(isFocused: isFocused) {
                 if let url = artworkURL {
-                    AsyncImage(url: url) { phase in
+                    AsyncImage(url: url, transaction: Transaction(animation: .easeInOut(duration: 0.7))) { phase in
                         switch phase {
                         case .success(let image):
                             image.resizable().scaledToFit()
                         case .failure:
-                            Color.secondary.opacity(0.1)
+                            Color(.systemGray5)
+                                .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+                                .overlay {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .font(.largeTitle)
+                                        .foregroundStyle(.secondary)
+                                }
                         case .empty:
-                            ProgressView()
+                            CoverArtSkeleton()
                         @unknown default:
-                            Color.secondary.opacity(0.1)
+                            CoverArtSkeleton()
                         }
                     }
                 } else {
-                    Color.secondary.opacity(0.1)
+                    CoverArtSkeleton()
                 }
-
             } back: {
-
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(metadata, id: \.0) { key, value in
                         if !value.isEmpty && value != "n/a" {
