@@ -15,7 +15,7 @@ struct ContentView: View {
                     if viewModel.isLoading {
                         LogoPatternView(strokeWidth: 4, enableHaptics: !isTyping)
                             .frame(width: 80, height: 80)
-                            .zIndex(2)
+                            .zIndex(1)
                     }
                 }
                 .searchable(text: $liveSearchTerm, prompt: "Search Song or Album")

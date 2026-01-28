@@ -5,22 +5,18 @@
 
 ### [Watch the demo video on YouTube](https://youtu.be/d1w29lK44IM) 
 
+## Features
 
-## Status: WIP
-- [x] Search via API (Spotify API, Odesli/Songlink, MusicBrainz). results with artwork, title, and artist. 
-- [x] Flippable artwork card with quick credits (release date, album, etc.). 
-- [x] One‑tap deep links to Apple Music, Spotify, TIDAL, and YouTube. 
-- [x] Light/Dark Mode‑aware icons and a clean SwiftUI layout.
+- **Cross-Platform Search**: Query tracks and albums via the Spotify API with instant, rich results.
+- **Song.link Integration**: One-tap deep links to Apple Music, Spotify, TIDAL, and YouTube.
+- **MusicBrainz Credits**: Flippable artwork card displaying release date, album, genre, and record label.
+- **Adaptive Design**: Light and dark mode support with platform-aware iconography.
 
 ## Roadmap
-- [x] Replace hardcoded data with a proper search/fetch API
-- [ ] Add ShazamKit‑powered audio search.
-- [ ] Accessibility polish and localization.
-- [ ] Add more features. (e.g., Favorites tab, user account, customizable platform buttons).
 
-## Notes
-- Work in progress: rough edges and frequent changes.
-- This project is not open source. No copying, redistribution, or forking is permitted.
+- [ ] ShazamKit-powered audio recognition.
+- [ ] Accessibility polish and localization.
+- [ ] Favorites tab and user preferences.
 
 ## License / Usage
 - All rights reserved.
