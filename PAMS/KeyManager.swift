@@ -1,4 +1,5 @@
 import Foundation
+import os
 
 enum KeyManager {
 
@@ -14,12 +15,16 @@ enum KeyManager {
     }
 
     private static var loaded: LoadedKeys?
+    private static let logger = Logger(subsystem: "com.pams.app", category: "KeyManager")
 
     // MARK: - Bootstrap
 
     @MainActor
     static func bootstrap() {
-        let dict = getKeys()
+        guard let dict = getKeys() else {
+            logger.error("Configuration plist not found. The app will launch but API features are disabled.")
+            return
+        }
 
         func string(_ key: String, trimAndNilIfEmpty: Bool = true) -> String? {
             guard let value = dict[key] as? String else { return nil }
@@ -36,13 +41,15 @@ enum KeyManager {
         }
 
         guard let clientID = string("SpotifyClientID") else {
-            fatalError("CRITICAL: 'SpotifyClientID' missing or not a String in plist.")
+            logger.error("SpotifyClientID missing from plist. API features disabled.")
+            return
         }
         guard let clientSecret = string("SpotifyClientSecret") else {
-            fatalError("CRITICAL: 'SpotifyClientSecret' missing or not a String in plist.")
+            logger.error("SpotifyClientSecret missing from plist. API features disabled.")
+            return
         }
 
-        let ua = string("MusicBrainzUserAgent") ?? "PAMS/1.0 (youremail@example.com)"
+        let ua = string("MusicBrainzUserAgent") ?? "PAMS/1.0 (https://github.com/leonardonapoless)"
 
         loaded = LoadedKeys(
             spotifyClientID: clientID,
@@ -57,11 +64,11 @@ enum KeyManager {
     }
 
     // MARK: - Internal Loading
-    
+
     private static var cachedKeys: [String: Any]?
 
     @MainActor
-    private static func getKeys() -> [String: Any] {
+    private static func getKeys() -> [String: Any]? {
         if let cached = cachedKeys { return cached }
 
         let candidateNames = ["Keys", "Keys-PAMS"]
@@ -75,23 +82,17 @@ enum KeyManager {
             }
         }
         
-        fatalError("CRITICAL: Configuration plist not found.")
+        return nil
     }
 
     // MARK: - Public Accessors
 
     static var spotifyClientID: String {
-        guard let l = loaded else {
-            fatalError("KeyManager not bootstrapped. Call KeyManager.bootstrap() on the main actor at app startup.")
-        }
-        return l.spotifyClientID
+        loaded?.spotifyClientID ?? ""
     }
 
     static var spotifyClientSecret: String {
-        guard let l = loaded else {
-            fatalError("KeyManager not bootstrapped. Call KeyManager.bootstrap() on the main actor at app startup.")
-        }
-        return l.spotifyClientSecret
+        loaded?.spotifyClientSecret ?? ""
     }
 
     static var spotifyRedirectURI: String? {
@@ -108,4 +109,3 @@ enum KeyManager {
     
     static let musicBrainzUserAgent = "PAMS/1.0 (https://github.com/leonardonapoless)"
 }
-

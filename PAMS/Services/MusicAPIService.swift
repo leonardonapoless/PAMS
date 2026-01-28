@@ -41,7 +41,7 @@ enum MusicAPIError: Error, LocalizedError {
 // MARK: - Service
 
 @MainActor
-class MusicAPIService {
+final class MusicAPIService: Sendable {
     static let shared = MusicAPIService()
     private let httpClient = URLSession.shared
     private var spotifyToken: SpotifyTokenResponse?
@@ -131,8 +131,6 @@ class MusicAPIService {
         }
     }
 
-
-    
     func getSonglink(for spotifyURL: String) async -> PlatformLinks? {
         guard let encodedURL = spotifyURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
               let url = URL(string: "https://api.song.link/v1-alpha.1/links?url=\(encodedURL)") else {
@@ -143,7 +141,6 @@ class MusicAPIService {
             let (data, _) = try await httpClient.data(from: url)
             return PlatformLinks(from: try JSONDecoder().decode(SonglinkResponse.self, from: data))
         } catch {
-            print("Songlink failed for URL \(spotifyURL): \(error.localizedDescription)")
             return nil 
         }
     }
@@ -168,7 +165,6 @@ class MusicAPIService {
             return parseMusicBrainzRecording(recording)
 
         } catch {
-            print("MusicBrainz failed for ISRC \(isrc): \(error.localizedDescription)")
             return .empty
         }
     }
@@ -253,4 +249,3 @@ class MusicAPIService {
         }
     }
 }
-
