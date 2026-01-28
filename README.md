@@ -1,7 +1,7 @@
 # PAMS - Platform Agnostic Music Search
-| Video Demo | GIF |
-| --- | --- |
-| [![Watch the video](https://img.youtube.com/vi/d1w29lK44IM/maxresdefault.jpg)](https://youtu.be/d1w29lK44IM) | ![pamsdemovideotrimmed](https://github.com/user-attachments/assets/583a84ff-cf6c-4e8a-9b9f-cd6d5a33801b) |
+| Copy Link | Video Demo | GIF |
+| --- | --- | --- |
+| ![pams–copy-link](https://github.com/user-attachments/assets/9698cd22-cd4c-49c2-9193-bb2826ecfd88) | [![Watch the video](https://img.youtube.com/vi/d1w29lK44IM/maxresdefault.jpg)](https://youtu.be/d1w29lK44IM) | ![pamsdemovideotrimmed](https://github.com/user-attachments/assets/583a84ff-cf6c-4e8a-9b9f-cd6d5a33801b) |
 
 ### [Watch the demo video on YouTube](https://youtu.be/d1w29lK44IM) 
 
