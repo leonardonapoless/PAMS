@@ -1,6 +1,7 @@
 import Foundation
+import RegexBuilder
 
-class MusicSearchRanker {
+actor MusicSearchRanker {
 
     private let stopWords: Set<String> = ["a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "has", "he", "in", "is", "it", "its", "of", "on", "that", "the", "to", "was", "were", "will", "with"]
 
@@ -35,19 +36,17 @@ class MusicSearchRanker {
     
     init() {}
     
-    enum RankedItem {
-        case track(SpotifyTrack, Double)
-        case album(SpotifyAlbum, Double)
+    struct RankedItem: Sendable {
+        let item: ItemType
+        let score: Double
         
-        var score: Double {
-            switch self {
-            case .track(_, let s): return s
-            case .album(_, let s): return s
-            }
+        enum ItemType: Sendable {
+            case track(SpotifyTrack)
+            case album(SpotifyAlbum)
         }
     }
 
-    struct SearchResult {
+    struct SearchResult: Sendable {
         let items: [RankedItem]
         let hasRelevantResults: Bool
     }
@@ -56,20 +55,18 @@ class MusicSearchRanker {
         let query = processQuery(term: term)
 
         var rankedItems: [RankedItem] = []
-        
 
         for (index, track) in tracks.enumerated() {
             let score = calculateTrackScore(track, query: query, originalIndex: index, totalItems: tracks.count)
             if score > 0 {
-                rankedItems.append(.track(track, score))
+                rankedItems.append(RankedItem(item: .track(track), score: score))
             }
         }
-        
 
         for (index, album) in albums.enumerated() {
             let score = calculateAlbumScore(album, query: query, originalIndex: index, totalItems: albums.count)
             if score > 0 {
-                rankedItems.append(.album(album, score))
+                rankedItems.append(RankedItem(item: .album(album), score: score))
             }
         }
 
@@ -94,7 +91,7 @@ class MusicSearchRanker {
 
     private func calculateTrackScore(_ track: SpotifyTrack, query: ProcessedQuery, originalIndex: Int, totalItems: Int) -> Double {
         let titleTokens = tokenize(track.name)
-        let artistTokens = tokenize(track.artistName)
+        let artistTokens = tokenize(track.artists.map { $0.name }.joined(separator: ", ")) // Avoid artistName if MainActor
         let albumTokens = tokenize(track.album.name)
 
         let titleScore = calculateFieldScore(query: query, fieldTokens: titleTokens)
@@ -136,7 +133,7 @@ class MusicSearchRanker {
 
     private func calculateAlbumScore(_ album: SpotifyAlbum, query: ProcessedQuery, originalIndex: Int, totalItems: Int) -> Double {
         let titleTokens = tokenize(album.name)
-        let artistTokens = tokenize(album.artistName)
+        let artistTokens = tokenize(album.artists.map { $0.name }.joined(separator: ", ")) // Avoid artistName if MainActor
         
         let titleScore = calculateFieldScore(query: query, fieldTokens: titleTokens)
         let artistScore = calculateFieldScore(query: query, fieldTokens: artistTokens)
@@ -157,7 +154,6 @@ class MusicSearchRanker {
              let penalty = pow(0.85, diff) 
              textScore *= penalty
         }
-        
         
         let albumEfficiencyBonus = 0.5
         let rankScore = (1.0 - (Double(originalIndex) / Double(totalItems))) * originalRankWeight
@@ -201,8 +197,13 @@ class MusicSearchRanker {
         var result = string.lowercased()
 
         for (key, value) in synonyms {
-            let pattern = "\\b\(NSRegularExpression.escapedPattern(for: key))\\b"
-            result = result.replacingOccurrences(of: pattern, with: value, options: [.regularExpression, .caseInsensitive])
+            let regex = Regex {
+                Anchor.wordBoundary
+                key
+                Anchor.wordBoundary
+            }.ignoresCase()
+            
+            result = result.replacing(regex, with: value)
         }
 
         result = result.folding(options: .diacriticInsensitive, locale:.current)

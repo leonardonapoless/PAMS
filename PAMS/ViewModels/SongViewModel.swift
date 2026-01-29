@@ -43,6 +43,7 @@ final class SongViewModel: ObservableObject {
     @Published private(set) var status: SearchStatus = .idle 
 
     private let apiService = MusicAPIService.shared
+    private let batchLoader = MusicBatchLoader()
     private let searchRanker = MusicSearchRanker()
     private var searchTask: Task<Void, Never>?
 
@@ -64,101 +65,14 @@ final class SongViewModel: ObservableObject {
         searchTask = Task {
             do {
                 var (spotifyTracks, spotifyAlbums) = try await apiService.searchSpotify(term: trimmed)
-                let trackAlbumIDs = spotifyTracks.map { $0.album.id }
-                let directAlbumIDs = spotifyAlbums.map { $0.id }
-                let allAlbumIDs = Set(trackAlbumIDs + directAlbumIDs)
                 
-                var enrichedAlbumMap: [String: SpotifyAlbum] = [:]
+                guard !Task.isCancelled else { return }
                 
-                if !allAlbumIDs.isEmpty {
-                    let chunks = stride(from: 0, to: allAlbumIDs.count, by: 20).map {
-                        Array(Array(allAlbumIDs)[$0..<min($0 + 20, allAlbumIDs.count)])
-                    }
-                    
-                    for chunk in chunks {
-                        if let fetchedAlbums = try? await apiService.getSpotifyAlbums(ids: chunk) {
-                            for album in fetchedAlbums {
-                                enrichedAlbumMap[album.id] = album
-                            }
-                        }
-                    }
-                                        
-                    spotifyAlbums = spotifyAlbums.map { enrichedAlbumMap[$0.id] ?? $0 }
-                    
-                    spotifyTracks = spotifyTracks.map { track in
-                        if let fullAlbum = enrichedAlbumMap[track.album.id] {
-                            return SpotifyTrack(
-                                id: track.id,
-                                name: track.name,
-                                artists: track.artists,
-                                album: fullAlbum, 
-                                externalIds: track.externalIds,
-                                externalUrls: track.externalUrls,
-                                durationMs: track.durationMs,
-                                popularity: track.popularity
-                            )
-                        } else {
-                            return track
-                        }
-                    }
-                }
+                (spotifyTracks, spotifyAlbums) = await batchLoader.enrich(tracks: spotifyTracks, albums: spotifyAlbums)
                 
-                let artistIDs = Set(spotifyTracks.compactMap { $0.artists.first?.id })
-                var enrichedArtistMap: [String: SpotifyArtist] = [:]
-                
-                if !artistIDs.isEmpty {
-                    let chunks = stride(from: 0, to: artistIDs.count, by: 50).map {
-                        Array(Array(artistIDs)[$0..<min($0 + 50, artistIDs.count)])
-                    }
-                    
-                    for chunk in chunks {
-                        if let fetchedArtists = try? await apiService.getSpotifyArtists(ids: chunk) {
-                            for artist in fetchedArtists {
-                                enrichedArtistMap[artist.id] = artist
-                            }
-                        }
-                    }
-                    
-                    spotifyTracks = spotifyTracks.map { track in
-                        if let firstArtist = track.artists.first, let fullArtist = enrichedArtistMap[firstArtist.id] {
-                            var newArtists = track.artists
-                            newArtists[0] = fullArtist
-                            return SpotifyTrack(
-                                id: track.id,
-                                name: track.name,
-                                artists: newArtists,
-                                album: track.album,
-                                externalIds: track.externalIds,
-                                externalUrls: track.externalUrls,
-                                durationMs: track.durationMs,
-                                popularity: track.popularity
-                            )
-                        }
-                        return track
-                    }
-                    
-                    spotifyAlbums = spotifyAlbums.map { album in
-                        if let firstArtist = album.artists.first, let fullArtist = enrichedArtistMap[firstArtist.id] {
-                           var newArtists = album.artists
-                           newArtists[0] = fullArtist
-                           return SpotifyAlbum(
-                               id: album.id,
-                               name: album.name,
-                               images: album.images,
-                               releaseDate: album.releaseDate,
-                               copyrights: album.copyrights,
-                               label: album.label,
-                               artists: newArtists,
-                               externalUrls: album.externalUrls,
-                               totalTracks: album.totalTracks,
-                               genres: album.genres
-                           )
-                        }
-                        return album
-                    }
-                }
-                
-                let rankedResult = searchRanker.sortAndFilter(tracks: spotifyTracks, albums: spotifyAlbums, term: trimmed)
+                guard !Task.isCancelled else { return }
+
+                let rankedResult = await searchRanker.sortAndFilter(tracks: spotifyTracks, albums: spotifyAlbums, term: trimmed)
                 let rankedItems = rankedResult.items
 
                 guard !Task.isCancelled else { return }
@@ -171,11 +85,11 @@ final class SongViewModel: ObservableObject {
 
                 if let firstRanked = rankedItems.first {
                     let firstResult: SearchResultItem
-                    switch firstRanked {
-                    case .track(let t, _): 
+                    switch firstRanked.item {
+                    case .track(let t): 
                         let p = await self.augmentSpotifyTrack(t)
                         firstResult = .track(p)
-                    case .album(let a, _): 
+                    case .album(let a): 
                         let p = await self.augmentSpotifyAlbum(a)
                         firstResult = .album(p)
                     }
@@ -186,9 +100,9 @@ final class SongViewModel: ObservableObject {
                     let remainingRanked = Array(rankedItems.dropFirst())
                     
                     initialResults.append(contentsOf: remainingRanked.map { item in
-                        switch item {
-                        case .track(let t, _): return .track(self.createPlaceholder(from: t))
-                        case .album(let a, _): return .album(self.createPlaceholder(from: a))
+                        switch item.item {
+                        case .track(let t): return .track(self.createPlaceholder(from: t))
+                        case .album(let a): return .album(self.createPlaceholder(from: a))
                         }
                     })
                     
@@ -198,10 +112,10 @@ final class SongViewModel: ObservableObject {
                     await withTaskGroup(of: SearchResultItem.self, returning: Void.self) { group in
                         for item in remainingRanked {
                             group.addTask {
-                                switch item {
-                                case .track(let t, _): 
+                                switch item.item {
+                                case .track(let t): 
                                     return .track(await self.augmentSpotifyTrack(t))
-                                case .album(let a, _): 
+                                case .album(let a): 
                                     return .album(await self.augmentSpotifyAlbum(a))
                                 }
                             }
