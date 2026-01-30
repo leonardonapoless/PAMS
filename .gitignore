@@ -34,7 +34,6 @@ IDETemplateMacros.plist
 # Swift Package Manager
 .swiftpm/
 .build/
-Package.resolved
 Packages/
 workspace-state.json
 
