@@ -227,16 +227,7 @@ actor MusicSearchRanker {
         return filteredTokens
     }
 
-    private func ngrams(tokens: [String], size: Int) -> Set<String> {
-        var ngrams = Set<String>()
-        guard tokens.count >= size else { return ngrams }
 
-        for i in 0...(tokens.count - size) {
-            let ngramSlice = tokens[i..<(i + size)]
-            ngrams.insert(ngramSlice.joined(separator: " "))
-        }
-        return ngrams
-    }
 
     private func levenshteinDistance(a: String, b: String) -> Int {
         let aChars = Array(a)

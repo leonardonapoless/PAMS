@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import AsyncAlgorithms
 
 enum SearchStatus: Equatable {
     case idle
@@ -45,113 +46,130 @@ final class SongViewModel: ObservableObject {
     private let apiService = MusicAPIService.shared
     private let batchLoader = MusicBatchLoader()
     private let searchRanker = MusicSearchRanker()
-    private var searchTask: Task<Void, Never>?
+    private let searchChannel = AsyncChannel<String>()
+    
+    init() {
+        Task {
+            var currentTask: Task<Void, Never>?
+            
+            for await term in searchChannel.debounce(for: .milliseconds(300)) {
+                currentTask?.cancel()
+                currentTask = Task {
+                    await performSearch(term: term)
+                }
+            }
+        }
+    }
 
     func search(term: String) {
-        searchTask?.cancel() 
-
+        Task {
+            await searchChannel.send(term)
+        }
+    }
+    
+    private func performSearch(term: String) async {
         let trimmed = term.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        results = []
+        guard !Task.isCancelled else { return }
+        
         status = .idle
-
+        
         guard !trimmed.isEmpty else {
+            results = []
             isLoading = false
             return
         }
 
         isLoading = true
         
-        searchTask = Task {
-            do {
-                var (spotifyTracks, spotifyAlbums) = try await apiService.searchSpotify(term: trimmed)
-                
+        do {
+            var (spotifyTracks, spotifyAlbums) = try await apiService.searchSpotify(term: trimmed)
+            
+            guard !Task.isCancelled else { return }
+            
+            (spotifyTracks, spotifyAlbums) = await batchLoader.enrich(tracks: spotifyTracks, albums: spotifyAlbums)
+            
+            guard !Task.isCancelled else { return }
+            
+            let rankedResult = await searchRanker.sortAndFilter(tracks: spotifyTracks, albums: spotifyAlbums, term: trimmed)
+            let rankedItems = rankedResult.items
+
+            guard !Task.isCancelled else { return }
+
+            if rankedItems.isEmpty {
+                self.status = .noResults(query: trimmed)
+            } else if !rankedResult.hasRelevantResults {
+                self.status = .lowRelevance(query: trimmed)
+            }
+
+            if let firstRanked = rankedItems.first {
                 guard !Task.isCancelled else { return }
                 
-                (spotifyTracks, spotifyAlbums) = await batchLoader.enrich(tracks: spotifyTracks, albums: spotifyAlbums)
-                
-                guard !Task.isCancelled else { return }
-
-                let rankedResult = await searchRanker.sortAndFilter(tracks: spotifyTracks, albums: spotifyAlbums, term: trimmed)
-                let rankedItems = rankedResult.items
-
-                guard !Task.isCancelled else { return }
-
-                if rankedItems.isEmpty {
-                    self.status = .noResults(query: trimmed)
-                } else if !rankedResult.hasRelevantResults {
-                    self.status = .lowRelevance(query: trimmed)
+                let firstResult: SearchResultItem
+                switch firstRanked.item {
+                case .track(let t):
+                    let p = await self.augmentSpotifyTrack(t)
+                    firstResult = .track(p)
+                case .album(let a):
+                    let p = await self.augmentSpotifyAlbum(a)
+                    firstResult = .album(p)
                 }
-
-                if let firstRanked = rankedItems.first {
-                    let firstResult: SearchResultItem
-                    switch firstRanked.item {
-                    case .track(let t): 
-                        let p = await self.augmentSpotifyTrack(t)
-                        firstResult = .track(p)
-                    case .album(let a): 
-                        let p = await self.augmentSpotifyAlbum(a)
-                        firstResult = .album(p)
+                
+                guard !Task.isCancelled else { return }
+                
+                var initialResults = [firstResult]
+                let remainingRanked = Array(rankedItems.dropFirst())
+                
+                initialResults.append(contentsOf: remainingRanked.map { item in
+                    switch item.item {
+                    case .track(let t): return .track(self.createPlaceholder(from: t))
+                    case .album(let a): return .album(self.createPlaceholder(from: a))
                     }
-                    
-                    guard !Task.isCancelled else { return }
-                    
-                    var initialResults = [firstResult]
-                    let remainingRanked = Array(rankedItems.dropFirst())
-                    
-                    initialResults.append(contentsOf: remainingRanked.map { item in
-                        switch item.item {
-                        case .track(let t): return .track(self.createPlaceholder(from: t))
-                        case .album(let a): return .album(self.createPlaceholder(from: a))
-                        }
-                    })
-                    
-                    self.results = initialResults
-                    self.isLoading = false
-                    
-                    await withTaskGroup(of: SearchResultItem.self, returning: Void.self) { group in
-                        for item in remainingRanked {
-                            group.addTask {
-                                switch item.item {
-                                case .track(let t): 
-                                    return .track(await self.augmentSpotifyTrack(t))
-                                case .album(let a): 
-                                    return .album(await self.augmentSpotifyAlbum(a))
-                                }
-                            }
-                        }
-                        
-                        for await result in group {
-                            if !Task.isCancelled {
-                                if let index = self.results.firstIndex(where: { $0.id == result.id }) {
-                                    self.results[index] = result
-                                }
+                })
+                
+                self.results = initialResults
+                self.isLoading = false
+                
+                await withTaskGroup(of: SearchResultItem.self, returning: Void.self) { group in
+                    for item in remainingRanked {
+                        group.addTask {
+                            switch item.item {
+                            case .track(let t):
+                                return .track(await self.augmentSpotifyTrack(t))
+                            case .album(let a):
+                                return .album(await self.augmentSpotifyAlbum(a))
                             }
                         }
                     }
+                    
+                    for await result in group {
+                        if !Task.isCancelled {
+                            if let index = self.results.firstIndex(where: { $0.id == result.id }) {
+                                self.results[index] = result
+                            }
+                        }
+                    }
                 }
-                
-                guard !Task.isCancelled else { return }
-
-            } catch is CancellationError {
-            } catch let error as URLError where error.code == .cancelled {
-            } catch let error as MusicAPIError {
-                switch error {
-                case .unauthorized: self.status = .sessionExpired
-                case .rateLimited: self.status = .rateLimited
-                case .network: self.status = .networkError
-                case .decoding, .invalidResponse: self.status = .genericError
-                }
-                self.results = []
-            } catch {
-                print("search failed with error: \(error)")
-                self.status = .genericError
-                self.results = []
             }
             
-            if !Task.isCancelled {
-                isLoading = false
+        } catch is CancellationError {
+        } catch let error as MusicAPIError {
+            guard !Task.isCancelled else { return }
+            switch error {
+            case .unauthorized: self.status = .sessionExpired
+            case .rateLimited: self.status = .rateLimited
+            case .network: self.status = .networkError
+            case .decoding, .invalidResponse: self.status = .genericError
             }
+            self.results = []
+        } catch {
+            guard !Task.isCancelled else { return }
+            self.status = .genericError
+            self.results = []
+        }
+        
+        if !Task.isCancelled {
+            isLoading = false
         }
     }
 

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		AD95E0912ED8E9DA003207BE /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = AD95E0902ED8E9DA003207BE /* AppIcon.icon */; };
+		ADA5629F2F2C661E001F64E4 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = ADA5629E2F2C661E001F64E4 /* Algorithms */; };
+		ADA562A22F2C6A12001F64E4 /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = ADA562A12F2C6A12001F64E4 /* AsyncAlgorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADA5629F2F2C661E001F64E4 /* Algorithms in Frameworks */,
+				ADA562A22F2C6A12001F64E4 /* AsyncAlgorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,6 +90,8 @@
 			);
 			name = PAMS;
 			packageProductDependencies = (
+				ADA5629E2F2C661E001F64E4 /* Algorithms */,
+				ADA562A12F2C6A12001F64E4 /* AsyncAlgorithms */,
 			);
 			productName = PAMS;
 			productReference = AD78AA7C2EAA345400DE7FC6 /* PAMS.app */;
@@ -115,6 +121,10 @@
 			);
 			mainGroup = AD78AA732EAA345400DE7FC6;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ADA5629D2F2C661E001F64E4 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+				ADA562A02F2C6A12001F64E4 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AD78AA7D2EAA345400DE7FC6 /* Products */;
 			projectDirPath = "";
@@ -377,6 +387,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ADA5629D2F2C661E001F64E4 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.1;
+			};
+		};
+		ADA562A02F2C6A12001F64E4 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ADA5629E2F2C661E001F64E4 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ADA5629D2F2C661E001F64E4 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+		ADA562A12F2C6A12001F64E4 /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ADA562A02F2C6A12001F64E4 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
+			productName = AsyncAlgorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AD78AA742EAA345400DE7FC6 /* Project object */;
 }
