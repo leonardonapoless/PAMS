@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import NukeUI
 
 struct SearchResultRow: View {
     let item: SearchResultItem
@@ -100,11 +101,10 @@ struct MediaResultRow: View {
         VStack(spacing: 12) {
             CoverArtCard(isFocused: isFocused) {
                 if let url = artworkURL {
-                    AsyncImage(url: url, transaction: Transaction(animation: .easeInOut(duration: 0.7))) { phase in
-                        switch phase {
-                        case .success(let image):
+                    LazyImage(url: url) { state in
+                        if let image = state.image {
                             image.resizable().scaledToFit()
-                        case .failure:
+                        } else if state.error != nil {
                             Color(.systemGray5)
                                 .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
                                 .overlay {
@@ -112,12 +112,11 @@ struct MediaResultRow: View {
                                         .font(.largeTitle)
                                         .foregroundStyle(.secondary)
                                 }
-                        case .empty:
-                            CoverArtSkeleton()
-                        @unknown default:
+                        } else {
                             CoverArtSkeleton()
                         }
                     }
+                    .animation(.easeInOut(duration: 0.7), value: true) 
                 } else {
                     CoverArtSkeleton()
                 }
