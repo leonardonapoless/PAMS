@@ -1,4 +1,5 @@
 import Foundation
+import Algorithms
 
 actor MusicBatchLoader {
     func enrich(tracks: [SpotifyTrack], albums: [SpotifyAlbum]) async -> (tracks: [SpotifyTrack], albums: [SpotifyAlbum]) {
@@ -70,18 +71,17 @@ actor MusicBatchLoader {
     private func fetchMissingAlbums(for tracks: [SpotifyTrack], existingAlbums: [SpotifyAlbum]) async -> [String: SpotifyAlbum] {
         let trackAlbumIDs = tracks.map { $0.album.id }
         let directAlbumIDs = existingAlbums.map { $0.id }
-        let allIDs = Set(trackAlbumIDs + directAlbumIDs)
+        let allIDs = Array((trackAlbumIDs + directAlbumIDs).uniqued())
         
         guard !allIDs.isEmpty else { return [:] }
         
-        let chunks = stride(from: 0, to: allIDs.count, by: 20).map {
-            Array(Array(allIDs)[$0..<min($0 + 20, allIDs.count)])
-        }
+        let chunks = allIDs.chunks(ofCount: 20)
         
         return await withTaskGroup(of: [SpotifyAlbum].self) { group in
             for chunk in chunks {
+                let ids = Array(chunk)
                 group.addTask {
-                    let albums = try? await MusicAPIService.shared.getSpotifyAlbums(ids: chunk)
+                    let albums = try? await MusicAPIService.shared.getSpotifyAlbums(ids: ids)
                     return albums ?? []
                 }
             }
@@ -99,18 +99,17 @@ actor MusicBatchLoader {
     private func fetchMissingArtists(for tracks: [SpotifyTrack], albums: [SpotifyAlbum]) async -> [String: SpotifyArtist] {
         let trackArtistIDs = tracks.compactMap { $0.artists.first?.id }
         let albumArtistIDs = albums.compactMap { $0.artists.first?.id }
-        let allIDs = Set(trackArtistIDs + albumArtistIDs)
+        let allIDs = Array((trackArtistIDs + albumArtistIDs).uniqued())
         
         guard !allIDs.isEmpty else { return [:] }
         
-        let chunks = stride(from: 0, to: allIDs.count, by: 50).map {
-            Array(Array(allIDs)[$0..<min($0 + 50, allIDs.count)])
-        }
+        let chunks = allIDs.chunks(ofCount: 50)
         
         return await withTaskGroup(of: [SpotifyArtist].self) { group in
             for chunk in chunks {
+                let ids = Array(chunk)
                 group.addTask {
-                    let artists = try? await MusicAPIService.shared.getSpotifyArtists(ids: chunk)
+                    let artists = try? await MusicAPIService.shared.getSpotifyArtists(ids: ids)
                     return artists ?? []
                 }
             }

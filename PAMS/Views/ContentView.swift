@@ -3,7 +3,6 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var viewModel = SongViewModel()
     @State private var liveSearchTerm: String = ""
-    @Debounced(wrappedValue: "", delay: 0.5) private var debouncedSearchTerm: String
     @State private var isTyping: Bool = false
     
     var body: some View {
@@ -20,11 +19,7 @@ struct ContentView: View {
                 }
                 .searchable(text: $liveSearchTerm, prompt: "Search Song or Album")
                 .onChange(of: liveSearchTerm) { _, newValue in
-                    isTyping = true
-                    debouncedSearchTerm = newValue
-                }
-                .onChange(of: debouncedSearchTerm) { _, newValue in
-                    isTyping = false
+                    isTyping = !newValue.isEmpty
                     viewModel.search(term: newValue)
                 }
             }
