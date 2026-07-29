@@ -4,6 +4,7 @@ PAMS/Keys.plist
 # Xcode Build Products
 DerivedData/
 build/
+build_output/
 *.ipa
 *.xcarchive
 *.dSYM
